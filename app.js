@@ -8,10 +8,17 @@ const app = express();
 
 // 1. MIDDLEWARES
 
-// Middleware
+// Middleware for reading file with data
 app.use(express.json());
-app.use(morgan('dev'));
 
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+//Taking static files
+app.use(express.static(`${__dirname}/public`));
+
+// Custom time middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
@@ -21,7 +28,5 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
-
-//START SERVER
 
 module.exports = app;
