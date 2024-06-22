@@ -3,7 +3,10 @@ const tourController = require('./../controllers/tourController');
 
 const router = express.Router();
 
-router.route('/').get(tourController.getallTours).post(tourController.postTour);
+//Check if is ID valid
+router.param('id', tourController.checkID);
+
+router.route('/').get(tourController.getallTours).post(tourController.checkBodyInfo, tourController.postTour);
 
 router
     .route('/:id')
