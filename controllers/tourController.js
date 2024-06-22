@@ -5,6 +5,29 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
+// Checing for valid ID
+exports.checkID = (req, res, next, value) =>{
+  console.log(value);
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID',
+    });
+  }
+  next();
+};
+
+// Checking for valid data information
+exports.checkBodyInfo = (req, res, next) => {
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'missing name or price'
+    });
+  }
+  next();
+};
+
 exports.getallTours = (req, res) => {
   console.log(req.requestTime);
   res.status(200).json({
@@ -21,14 +44,7 @@ exports.getSingleTour = (req, res) => {
   // Auto convert to to number
   const id = req.params.id * 1;
 
-  if (id > tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
-
-  exports.tour = tours.find((tour) => tour.id === id);
+  const tour = tours.find((tour) => tour.id === id);
   res.status(200).json({
     status: 'success',
     data: {
@@ -57,12 +73,7 @@ exports.postTour = (req, res) => {
 };
 
 exports.patchSignleTour = (req, res) => {
-  if (req.params.id * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
+
   res.status(200).json({
     status: 'Success',
     data: {
@@ -72,12 +83,7 @@ exports.patchSignleTour = (req, res) => {
 };
 
 exports.deleteTour = (req, res) => {
-  if (req.params.id * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
+
   res.status(204).json({
     status: 'Success',
     data: null,
