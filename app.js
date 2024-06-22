@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
 
-app.use((req, res, next) =>{
+app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
 });
@@ -19,7 +19,7 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-//2. ROUTE HANDLER 
+//2. ROUTE HANDLER
 
 const getallTours = (req, res) => {
   console.log(req.requestTime);
@@ -100,17 +100,59 @@ const deleteTour = (req, res) => {
   });
 };
 
-// app.get('/api/v1/tours', getallTours);
-// app.post('/api/v1/tours', postTour);
-// app.get('/api/v1/tours/:id', getSingleTour);
-// app.patch('/api/v1/tours/:id', patchSignleTour);
-// app.delete('/api/v1/tours/:id', deleteTour);
+const getAllUsers = (req, res) => {
+  res.status(500).json({
+    status: 'Error',
+    message: 'This route is stil not defined',
+  });
+};
+
+const createUser = (req, res) => {
+  res.status(500).json({
+    status: 'Error',
+    message: 'This route is stil not defined',
+  });
+};
+
+const getUser = (req, res) => {
+  res.status(500).json({
+    status: 'Error',
+    message: 'This route is stil not defined',
+  });
+};
+
+const updateUser = (req, res) => {
+  res.status(500).json({
+    status: 'Error',
+    message: 'This route is stil not defined',
+  });
+};
+
+const deleteUser = (req, res) => {
+  res.status(500).json({
+    status: 'Error',
+    message: 'This route is stil not defined',
+  });
+};
 
 //3 . ROUTES
+const tourRouter = express.Router();
+const userRouter = express.Router();
 
-app.route('/api/v1/tours').get(getallTours).post(postTour);
+tourRouter.route('/').get(getallTours).post(postTour);
 
-app.route('/api/v1/tours/:id').get(getSingleTour).patch(patchSignleTour).delete(deleteTour);
+tourRouter
+  .route('/:id')
+  .get(getSingleTour)
+  .patch(patchSignleTour)
+  .delete(deleteTour);
+
+userRouter.route('/').get(getAllUsers).post(createUser);
+
+userRouter.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
+
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
 
 //START SERVER
 
