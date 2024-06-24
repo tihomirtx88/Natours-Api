@@ -11,7 +11,7 @@ router.route('/').get(tourController.getallTours).post(tourController.createTour
 router
     .route('/:id')
     .get(tourController.getSingleTour)
-    .patch(tourController.patchSignleTour)
+    .patch(tourController.updateTour)
     .delete(tourController.deleteTour);
 
 
