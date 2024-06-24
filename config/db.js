@@ -1,4 +1,5 @@
 const mongoose = require(`mongoose`);
+require(`../models/tourModel`);
 require('dotenv').config();
 
 mongoose.set('strictQuery', false);
@@ -27,3 +28,4 @@ module.exports = async(app) => {
         process.exit(1)
     }
 };
+
