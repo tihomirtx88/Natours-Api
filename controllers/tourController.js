@@ -1,4 +1,5 @@
 const fs = require('fs');
+const Tour = require('../models/tourModel');
 
 //Middleware for reading data from json dev file
 const tours = JSON.parse(
