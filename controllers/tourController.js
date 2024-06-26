@@ -6,6 +6,7 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
+
 // Checing for valid ID
 exports.checkID = (req, res, next, value) => {
   console.log(value);
