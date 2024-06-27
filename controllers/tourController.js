@@ -6,7 +6,6 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
-
 // Checing for valid ID
 exports.checkID = (req, res, next, value) => {
   console.log(value);
@@ -23,13 +22,16 @@ exports.getallTours = async (req, res) => {
   try {
     //BUILD QUERY
     //1.Filtering
-    const queryObj = {...req.query};
-    const exludedFields = ['page', 'sort', 'limit', 'fields']; 
+    const queryObj = { ...req.query };
+    const exludedFields = ['page', 'sort', 'limit', 'fields'];
     exludedFields.forEach(el => delete queryObj[el]);
 
     //2.Advanced filtering
     let queryString = JSON.stringify(queryObj);
-    queryString = queryString.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+    queryString = queryString.replace(
+      /\b(gte|gt|lte|lt)\b/g,
+      match => `$${match}`
+    );
 
     //gte, gt, lte, lt
 
@@ -38,17 +40,26 @@ exports.getallTours = async (req, res) => {
     let query = Tour.find(JSON.parse(queryString));
 
     //3. Sorting
-    if(req.query.sort){
+    if (req.query.sort) {
       const sortBy = req.query.sort.split(',').join(' ');
       query = query.sort(sortBy);
-    }else{
+    } else {
       query = query.sort('-createdAt');
     }
-    
+
+    //Fields limiting
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+      query = query.select(fields);
+    } else {
+      // Exloding  __v property 
+      query = query.select('-__v');
+    }
+
     // Execute query
     const tours = await query;
-    
-    //Send Response 
+
+    //Send Response
     res.status(200).json({
       status: 'success',
       results: tours.length,
