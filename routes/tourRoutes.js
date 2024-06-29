@@ -3,8 +3,7 @@ const tourController = require('./../controllers/tourController');
 
 const router = express.Router();
 
-//Check if is ID valid
-// router.param('id', tourController.checkID);
+router.route('/top-5-cheap').get(tourController.aliasTopTours, tourController.getallTours);
 
 router.route('/').get(tourController.getallTours).post(tourController.createTour);
 

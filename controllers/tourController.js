@@ -2,19 +2,16 @@ const fs = require('fs');
 const Tour = require('../models/tourModel');
 
 //Middleware for reading data from json dev file
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-);
+// const tours = JSON.parse(
+//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
+// );
 
-// Checing for valid ID
-exports.checkID = (req, res, next, value) => {
-  console.log(value);
-  if (req.params.id * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID'
-    });
-  }
+
+// Prefilling query string
+exports.aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = 'ratingsAverage, price';
+  req.query.fields = 'name, price, ratingsAverage, summary, difficulty';
   next();
 };
 
@@ -52,7 +49,7 @@ exports.getallTours = async (req, res) => {
       const fields = req.query.fields.split(',').join(' ');
       query = query.select(fields);
     } else {
-      // Exloding  __v property 
+      // Exloding  __v property
       query = query.select('-__v');
     }
 
@@ -65,7 +62,7 @@ exports.getallTours = async (req, res) => {
 
     if (req.query.page) {
       const numTours = await Tour.countDocuments();
-      if(skip >= numTours) throw new Error('This page does not exist');
+      if (skip >= numTours) throw new Error('This page does not exist');
     }
 
     // Execute query
