@@ -64,7 +64,11 @@ const tourSchema = new mongoose.Schema(
       default: Date.now(),
       select: false
     },
-    startDates: [Date]
+    startDates: [Date],
+    secretTour: {
+      type: Boolean, 
+      default: false
+    }
   },
   {
     // Each time when data is outputet as json take virtual property
@@ -84,10 +88,24 @@ tourSchema.pre('save', function(next) {
   next();
 });
 
+// QUERY MIDDLEWARE and its work for all find() methods
+tourSchema.pre(/^find/, function(next) {
+
+  this.find({secretTour: {$ne: true}});
+  
+  this.start = Date.now()
+
+  next();
+});
+
 // Affter all middlewares are exexuted
-tourSchema.post('save', function(dox, next){
-   console.log(doc);
-   next();
+tourSchema.post(/^find/, function(docs, next) {
+  
+  console.log(`Query took ${Date.now() - this.start} milliesecodns`);
+  console.log(docs);
+
+  next();
+
 });
 
 const Tour = model('Tour', tourSchema);
