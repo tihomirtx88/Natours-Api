@@ -66,7 +66,7 @@ const tourSchema = new mongoose.Schema(
     },
     startDates: [Date],
     secretTour: {
-      type: Boolean, 
+      type: Boolean,
       default: false
     }
   },
@@ -85,27 +85,35 @@ tourSchema.virtual('durationWeeks').get(function() {
 // Document middleware and will be call before save() and create()
 tourSchema.pre('save', function(next) {
   this.slug = slugify(this.name, { lower: true });
+  
   next();
 });
 
 // QUERY MIDDLEWARE and its work for all find() methods
 tourSchema.pre(/^find/, function(next) {
+  this.find({ secretTour: { $ne: true } });
 
-  this.find({secretTour: {$ne: true}});
-  
-  this.start = Date.now()
+  this.start = Date.now();
 
   next();
 });
 
 // Affter all middlewares are exexuted
 tourSchema.post(/^find/, function(docs, next) {
-  
   console.log(`Query took ${Date.now() - this.start} milliesecodns`);
-  console.log(docs);
+
+  // console.log(docs);
 
   next();
+});
 
+// AGREGATIOM MIDDLEWARE
+tourSchema.pre('aggregate', function(next) {
+  // console.log(this);
+  // Remove all tour who have secretTour : true
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+
+  next();
 });
 
 const Tour = model('Tour', tourSchema);
