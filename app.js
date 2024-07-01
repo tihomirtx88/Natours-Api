@@ -1,6 +1,8 @@
 const express = require('express');
 const databaseConfig = require(`./config/db`);
 const morgan = require('morgan');
+const AppError = require('./utils/apiError');
+const globalErrrorHandler = require('./controllers/errorController');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -36,11 +38,11 @@ async function start() {
   app.use('/api/v1/users', userRouter);
 
   app.all('*', (req, res, next) => {
-    res.status(404).json({
-      status: 'fail',
-      message: `Cant find ${req.originalUrl} on this server!`
-    });
+    next(new AppError(`Cant find ${req.originalUrl} on this server!`, 404));
   });
+
+  //Error middleware
+  app.use(globalErrrorHandler);
 }
 
 module.exports = app;
