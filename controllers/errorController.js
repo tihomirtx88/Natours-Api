@@ -1,9 +1,16 @@
 const AppError = require('./../utils/apiError');
 
-//Translate error from Mongo to nice human error for production 
+//Send Better message from mongo to client in case wrong ID
 const handleCastErrorDB = err => {
-   const message = `Invalid ${err.path}: ${err.value}.`;
-   return new AppError(message, 400);
+  const message = `Invalid ${err.path}: ${err.value}.`;
+  return new AppError(message, 400);
+};
+
+//Send Better message from mongo to client in case duplicate name 
+const handleDuplicatesFields = err => {
+  const value = err.errmsg.match(/(["'])(?:(?=(\\?))\2.)*?\1/)[0];
+  const message = `Duplicate fields value: ${value}. Please use another value`;
+  return new AppError(message, 400);
 };
 
 const sendErrorDev = (err, res) => {
@@ -22,17 +29,16 @@ const sendErrorProd = (err, res) => {
       status: err.status,
       message: err.message
     });
-  // Programing or other unknown error: dont want to leave details on the client 
-  }else{
+    // Programing or other unknown error: dont want to leave details on the client
+  } else {
     //1. Log error
-     console.error('ERROR :(', err);
+    console.error('ERROR :(', err);
     //2. Send generic message
     res.status(500).json({
       status: 'error',
       message: 'Something went very wrong!'
     });
   }
- 
 };
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
@@ -41,9 +47,11 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
-    // Hard copy on error object and asignt to 
-    let error = {...err};
+    // Hard copy on error object and asignt to
+    let error = { ...err };
+
     if (error.name === 'CastError') error = handleCastErrorDB(error);
+    if (error.code === 11000) error = handleDuplicatesFields(error);
 
     sendErrorProd(error, res);
   }
