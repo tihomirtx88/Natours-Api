@@ -23,9 +23,11 @@ module.exports = async(app) => {
             console.error(err);
         });
     } catch (err) {
-        console.log(err);
-        console.error(`Error connetion on database`);
-        process.exit(1)
+        process.on('unhandleRejection', err => {
+            console.log('UNHANDLER REJECTIONS, shooting down...');
+            console.log(err);
+            process.exit(1);
+        });
     }
 };
 
