@@ -6,10 +6,19 @@ const handleCastErrorDB = err => {
   return new AppError(message, 400);
 };
 
-//Send Better message from mongo to client in case duplicate name 
+//Send Better message from mongo to client in case duplicate name
 const handleDuplicatesFields = err => {
   const value = err.errmsg.match(/(["'])(?:(?=(\\?))\2.)*?\1/)[0];
   const message = `Duplicate fields value: ${value}. Please use another value`;
+  return new AppError(message, 400);
+};
+
+// Send better message from mongoose to client in case invalid data fields
+const handleValidationError = err => {
+  // Map around errors from error object
+  const errors = Object.values(err.errors).map(el => el.message);
+
+  const message = `Invalid input data. ${errors.join('. ')}`;
   return new AppError(message, 400);
 };
 
@@ -52,6 +61,7 @@ module.exports = (err, req, res, next) => {
 
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicatesFields(error);
+    if (error.name === 'ValidationError') error = handleValidationError(error);
 
     sendErrorProd(error, res);
   }
