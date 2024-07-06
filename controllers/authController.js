@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/apiError');
-const bcrypt = require('bcryptjs');
 
 const signToken = id => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET, {
@@ -15,6 +14,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
+    role: req.body.role,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm
   });
@@ -89,9 +89,22 @@ exports.protect = catchAsync(async (req, res, next) => {
       new AppError('User recently changed password! Please login again !', 401)
     );
   }
-  
-  //Update user data access 
+
+  //Update user data access
   req.user = currentUser;
 
   next();
 });
+
+exports.restrictTo = (...roles) => {
+  //roles: [admin, lead-guide], role=user and this middleware have access to roles parametars beacse there is a closer because
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      next(
+        new AppError('You do not have persmission to perform this action!', 403)
+      );
+    }
+
+    next();
+  };
+};
