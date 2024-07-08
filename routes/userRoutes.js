@@ -11,7 +11,7 @@ router.post('/login', authController.login);
 // Recive email
 router.post('/forgotPassword', authController.forgotPassword);
 //recive token
-router.post('/resetPassword', authController.resetPassword);
+router.patch('/resetPassword:token', authController.resetPassword);
 
 router.route('/').get(userController.getAllUsers).post(userController.createUser);
 
