@@ -59,12 +59,13 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre('save', async function(next) {
   //Run tihs function if passowrd was actulay modified
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || this.isNew) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
   //Delete passwordConfirm field
   this.passwordConfirm = undefined;
-
+  
+  // Date.now() - 1000 for can i sure the token is created 1 second pass affter password has been changed 
   this.passwordChangedAt = Date.now() - 1000;
   next();
 });
@@ -95,9 +96,9 @@ userSchema.methods.createPasswordResetToken = function() {
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
-  
-  console.log({resetToken}, this.passwordResetToken);
-                              //To add few miliseconds
+
+  console.log({ resetToken }, this.passwordResetToken);
+  //To add few miliseconds
   this.passwordResetExpired = Date.now() + 10 * 60 * 100;
 
   return resetToken;
