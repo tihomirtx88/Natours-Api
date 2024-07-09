@@ -1,5 +1,6 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/apiError');
@@ -34,6 +35,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   // const email = req.body.email;
   const { email, password } = req.body;
+
   // 1. Cheking if email and password exist
   if (!email || !password) {
     return next(new AppError('Please provide email and password!', 400));
@@ -56,8 +58,9 @@ exports.login = catchAsync(async (req, res, next) => {
 
 //Protect middleware
 exports.protect = catchAsync(async (req, res, next) => {
-  //1. Getting token and checj if is it there
+  //1. Getting token and check if is it there
   let token;
+
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
@@ -70,6 +73,7 @@ exports.protect = catchAsync(async (req, res, next) => {
       new AppError('You are not logged in! Please login to get access.', 401)
     );
   }
+
   //2. Verification token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
@@ -120,23 +124,24 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   // 2. Generate the random reset token
   const resetToken = user.createPasswordResetToken();
+
   // Save data in this case
-  await user.save({validateBeforeSave: false});
+  await user.save({ validateBeforeSave: false });
 
   //3. Send it to user email
-  const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+  const resetURL = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/users/resetPassword/${resetToken}`;
 
   const message = `Forgot yor password? Submit a PATCH requiest with your new password and passwordConfirm to: ${resetURL}. \n If you did not forget your password, please ignore this email`;
 
   try {
-    console.log('Calling sendEmail function...');
     await sendEmail({
       email: 'retha.walsh@ethereal.email',
       subject: 'Your password reset token (valid for 10 min)',
       message
     });
-  
-    console.log('Email sent successfully. Sending response...');
+
     res.status(200).json({
       status: 'success',
       message: 'Token sent to email'
@@ -144,10 +149,45 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   } catch (error) {
     user.passwordResetToken = undefined;
     user.passwordResetExpired = undefined;
+
     // Save data in this case
-    await user.save({validateBeforeSave: false});
-    return next(new AppError('There was error sedning tge email. Try again later.', 500));
+    await user.save({ validateBeforeSave: false });
+    return next(
+      new AppError('There was error sedning tge email. Try again later.', 500)
+    );
   }
 });
 
-exports.resetPassword = (req, res, next) => {};
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  //1. Get User based on token
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpired: { $gt: Date.now() }
+  });
+
+  //2. if Token has no expired and there is a user, set the new password
+  if (!user) {
+    return next(new AppError('Token is invalid or has expired', 400));
+  }
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpired = undefined;
+  await user.save();
+
+  //3. Update changedPasswordAt property for the user
+  //It`s do it in pre middleware in user model -> this.passwordChangedAt = Date.now() - 1000;
+
+  //4. Log the user in, send JWT
+  const token = signToken(user._id);
+  res.status(200).json({
+    status: 'success',
+    token
+  });
+});
