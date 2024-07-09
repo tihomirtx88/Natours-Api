@@ -8,6 +8,8 @@ const router = express.Router();
 router.post('/signup', authController.signUp);
 router.post('/login', authController.login);
 
+router.patch('/updatePassword',authController.protect, authController.updatePassword);
+
 // Recive email
 router.post('/forgotPassword', authController.forgotPassword);
 //recive token
