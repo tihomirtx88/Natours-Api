@@ -10,6 +10,8 @@ router.post('/login', authController.login);
 
 router.patch('/updatePassword',authController.protect, authController.updatePassword);
 
+router.patch('/updateMe',authController.protect, userController.updateMe);
+
 // Recive email
 router.post('/forgotPassword', authController.forgotPassword);
 //recive token
