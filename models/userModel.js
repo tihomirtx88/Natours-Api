@@ -54,10 +54,15 @@ const userSchema = new mongoose.Schema({
   },
   passwordResetExpired: {
     type: Date
+  },
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
   }
 });
 
-//The middlewares will not working if use in controller getByIdAndUpdate for example or another update mongoose method 
+//The middlewares will not working if use in controller getByIdAndUpdate for example or another update mongoose method
 
 userSchema.pre('save', async function(next) {
   //Run tihs function if passowrd was actulay modified
@@ -65,12 +70,19 @@ userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
-  console.log(this.password,'Middleware is running...');
+  console.log(this.password, 'Middleware is running...');
   //Delete passwordConfirm field
   this.passwordConfirm = undefined;
-  
-  // Date.now() - 1000 for can i sure the token is created 1 second pass affter password has been changed 
+
+  // Date.now() - 1000 for can i sure the token is created 1 second pass affter password has been changed
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+//Every middleware with one is with find
+userSchema.pre(/^find/, async function(next) {
+  //this point to the current query
+  this.find({ active: {$ne: false} });
   next();
 });
 
