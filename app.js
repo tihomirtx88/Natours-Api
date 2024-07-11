@@ -2,6 +2,7 @@ const express = require('express');
 const databaseConfig = require(`./config/db`);
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const AppError = require('./utils/apiError');
 const globalErrrorHandler = require('./controllers/errorController');
 
@@ -16,6 +17,11 @@ async function start() {
   await databaseConfig(app);
 
   // 1.GLOBAL MIDDLEWARES
+  
+  //Set http secure header
+  app.use(helmet());
+  
+  //Development logging
   if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
   }
@@ -29,13 +35,13 @@ async function start() {
   
   app.use('/api', limiter);
 
-  // Middleware for reading file with data
-  app.use(express.json());
+  //Body parser, reading data from body 
+  app.use(express.json({limit: '10kb'}));
 
-  //Taking static files
+  //Serving static files
   app.use(express.static(`${__dirname}/public`));
 
-  // Custom time middleware
+  // Custom test time middleware
   app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
     next();
