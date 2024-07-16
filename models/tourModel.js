@@ -8,6 +8,8 @@ const {
 const slugify = require('slugify');
 const validator = require('validator');
 
+const User = require('../models/userModel');
+
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -110,7 +112,8 @@ const tourSchema = new mongoose.Schema(
         description: String,
         day: Number
       }
-    ]
+    ],
+    guides: Array
   },
   {
     // Each time when data is outputet as json take virtual property
@@ -128,6 +131,16 @@ tourSchema.virtual('durationWeeks').get(function() {
 tourSchema.pre('save', function(next) {
   this.slug = slugify(this.name, { lower: true });
 
+  next();
+});
+
+
+// Embedding way
+tourSchema.pre('save', async function(next){
+  // Array from promises
+  const guidesPromises = this.guides.map(async id => await User.findById(id));
+  this.guides = await Promise.all(guidesPromises);
+  
   next();
 });
 
