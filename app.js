@@ -1,17 +1,23 @@
 const express = require('express');
 const databaseConfig = require(`./config/db`);
+
+// Security 
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+
+// Middlewares
 const AppError = require('./utils/apiError');
 const globalErrrorHandler = require('./controllers/errorController');
 
+//Routes
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
+// Start app
 const app = express();
 
 start();

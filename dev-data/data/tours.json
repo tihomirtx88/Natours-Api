@@ -15,7 +15,7 @@
       "2021-08-18T09:00:00.000Z"
     ],
     "_id": "5c88fa8cf4afda39709c2955",
-    "name": "The Sea Explorer",
+    "name": "TheSeaExplorer",
     "duration": 7,
     "maxGroupSize": 15,
     "difficulty": "medium",
@@ -71,7 +71,7 @@
       "2021-10-05T09:00:00.000Z"
     ],
     "_id": "5c88fa8cf4afda39709c2951",
-    "name": "The Forest Hiker",
+    "name": "TheForestHiker",
     "duration": 5,
     "maxGroupSize": 25,
     "difficulty": "easy",
@@ -124,10 +124,10 @@
       "2023-01-06T10:00:00.000Z"
     ],
     "_id": "5c88fa8cf4afda39709c295a",
-    "name": "The Snow Adventurer",
+    "name": "TheSnowAdventurer",
     "duration": 4,
     "maxGroupSize": 10,
-    "difficulty": "difficult",
+    "difficulty": "difficulty",
     "guides": [
       "5c8a21d02f8fb814b56fa189",
       "5c8a23412f8fb814b56fa18c",
@@ -170,7 +170,7 @@
       "2022-08-12T09:00:00.000Z"
     ],
     "_id": "5c88fa8cf4afda39709c2961",
-    "name": "The Park Camper",
+    "name": "TheParkCamper",
     "duration": 10,
     "maxGroupSize": 15,
     "difficulty": "medium",
@@ -230,7 +230,7 @@
       "2021-06-09T09:00:00.000Z"
     ],
     "_id": "5c88fa8cf4afda39709c295d",
-    "name": "The City Wanderer",
+    "name": "TheCityWanderer",
     "duration": 9,
     "maxGroupSize": 20,
     "difficulty": "easy",
@@ -279,10 +279,10 @@
       "2022-03-18T10:00:00.000Z"
     ],
     "_id": "5c88fa8cf4afda39709c2966",
-    "name": "The Sports Lover",
+    "name": "TheSportsLover",
     "duration": 14,
     "maxGroupSize": 8,
-    "difficulty": "difficult",
+    "difficulty": "difficulty",
     "guides": [
       "5c8a21f22f8fb814b56fa18a",
       "5c8a1f292f8fb814b56fa184",
@@ -346,7 +346,7 @@
       "2022-01-30T10:00:00.000Z"
     ],
     "_id": "5c88fa8cf4afda39709c2970",
-    "name": "The Star Gazer",
+    "name": "TheStarGazer",
     "duration": 9,
     "maxGroupSize": 8,
     "difficulty": "medium",
@@ -395,7 +395,7 @@
       "2022-12-12T10:00:00.000Z"
     ],
     "_id": "5c88fa8cf4afda39709c2974",
-    "name": "The Northern Lights",
+    "name": "TheNorthernLights",
     "duration": 3,
     "maxGroupSize": 12,
     "difficulty": "easy",
@@ -434,7 +434,7 @@
       "2021-09-01T09:00:00.000Z"
     ],
     "_id": "5c88fa8cf4afda39709c296c",
-    "name": "The Wine Taster",
+    "name": "TheWineTaster",
     "duration": 5,
     "maxGroupSize": 8,
     "difficulty": "easy",

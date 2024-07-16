@@ -27,14 +27,14 @@ mongoose.connection.on(`error`, err => {
 
 // Read JSON file
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8')
+  fs.readFileSync(`${__dirname}/tours.json`, 'utf-8')
 );
 
 // Import Data in DataBase
 const importData = async () => {
   try {
     await Tour.create(tours);
-    // console.log(tours);
+    console.log(tours);
     process.exit();
   } catch (error) {
     console.log(error);
