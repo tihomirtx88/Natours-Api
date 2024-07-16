@@ -85,7 +85,32 @@ const tourSchema = new mongoose.Schema(
     secretTour: {
       type: Boolean,
       default: false
-    }
+    },
+    // Embeded schema property
+    startLocation:{
+      // Geo json
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point']
+      },
+      cordinates: [Number],
+      address: String,
+      description: String
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point']
+        },
+        cordinates: [Number],
+        address: String,
+        description: String,
+        day: Number
+      }
+    ]
   },
   {
     // Each time when data is outputet as json take virtual property
