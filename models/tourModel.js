@@ -8,7 +8,7 @@ const {
 const slugify = require('slugify');
 const validator = require('validator');
 
-const User = require('../models/userModel');
+// const User = require('../models/userModel');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -113,7 +113,14 @@ const tourSchema = new mongoose.Schema(
         day: Number
       }
     ],
-    guides: Array
+    guides: [
+      {
+        type: ObjectId,
+        ref: 'User'
+      }
+    ]
+    //For embeding way
+    // guides: Array
   },
   {
     // Each time when data is outputet as json take virtual property
@@ -136,13 +143,13 @@ tourSchema.pre('save', function(next) {
 
 
 // Embedding way
-tourSchema.pre('save', async function(next){
-  // Array from promises
-  const guidesPromises = this.guides.map(async id => await User.findById(id));
-  this.guides = await Promise.all(guidesPromises);
+// tourSchema.pre('save', async function(next){
+//   // Array from promises
+//   const guidesPromises = this.guides.map(async id => await User.findById(id));
+//   this.guides = await Promise.all(guidesPromises);
   
-  next();
-});
+//   next();
+// });
 
 // QUERY MIDDLEWARE and its work for all find() methods
 tourSchema.pre(/^find/, function(next) {
