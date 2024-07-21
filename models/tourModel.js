@@ -118,7 +118,8 @@ const tourSchema = new mongoose.Schema(
         type: ObjectId,
         ref: 'User'
       }
-    ]
+    ],
+    
     //For embeding way
     // guides: Array
   },
@@ -132,6 +133,15 @@ const tourSchema = new mongoose.Schema(
 // Virtual property
 tourSchema.virtual('durationWeeks').get(function() {
   return this.duration / 7;
+});
+
+//Virtual populating - make referencing to tour widthout to persist in database
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  // field from review model
+  foreignField: 'tour',
+  // Current id tour
+  localField: '_id'
 });
 
 // Document middleware and will be call before save() and create()
