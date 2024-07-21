@@ -89,7 +89,7 @@ const tourSchema = new mongoose.Schema(
       default: false
     },
     // Embeded schema property
-    startLocation:{
+    startLocation: {
       // Geo json
       type: {
         type: String,
@@ -141,13 +141,12 @@ tourSchema.pre('save', function(next) {
   next();
 });
 
-
 // Embedding way
 // tourSchema.pre('save', async function(next){
 //   // Array from promises
 //   const guidesPromises = this.guides.map(async id => await User.findById(id));
 //   this.guides = await Promise.all(guidesPromises);
-  
+
 //   next();
 // });
 
@@ -156,6 +155,16 @@ tourSchema.pre(/^find/, function(next) {
   this.find({ secretTour: { $ne: true } });
 
   this.start = Date.now();
+
+  next();
+});
+
+//Get populate data in query
+tourSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt'
+  });
 
   next();
 });
