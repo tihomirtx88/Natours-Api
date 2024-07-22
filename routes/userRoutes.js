@@ -15,11 +15,12 @@ router.delete('/deleteMe',authController.protect, userController.deleteMe);
 
 // Recive email
 router.post('/forgotPassword', authController.forgotPassword);
+
 //recive token
 router.patch('/resetPassword/:token', authController.resetPassword);
 
 router.route('/').get(userController.getAllUsers).post(userController.createUser);
 
-router.route('/:id').get(userController.getUser).patch(userController.updateUser).delete(userController.deleteUser);
+router.route('/:id').get(userController.getUser).patch(userController.updateUser).delete(userController.deleteMe);
 
 module.exports = router;

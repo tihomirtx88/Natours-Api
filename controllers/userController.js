@@ -1,6 +1,7 @@
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/apiError');
+const factory = require('./handlerFactory')
 
 const filteredObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -52,6 +53,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
+
 exports.deleteMe = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id, { active: false });
 
@@ -82,9 +84,5 @@ exports.updateUser = (req, res) => {
   });
 };
 
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'Error',
-    message: 'This route is stil not defined'
-  });
-};
+exports.deleteUser = factory.deleteOne(User);
+
