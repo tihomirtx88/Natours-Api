@@ -8,7 +8,7 @@ const router = express.Router();
 //POST /tour/34234sdads/reviews
 //GET /tour/324fsdf34/reviews
 
-//Middleware to use reviews router for nested router
+//Middleware to use reviews router for nested router or some kind redirect
 router.use('/:tourId/reviews', reviewRouter);
 
 router.route('/top-5-cheap').get(tourController.aliasTopTours, tourController.getallTours);
