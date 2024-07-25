@@ -1,7 +1,7 @@
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/apiError');
-const factory = require('./handlerFactory')
+const factory = require('./handlerFactory');
 
 const filteredObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -11,6 +11,12 @@ const filteredObj = (obj, ...allowedFields) => {
 
   return newObj;
 };
+
+// Get data for current user 
+exports.getMe = catchAsync(async (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+});
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const users = await User.find();
@@ -53,7 +59,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
-
 exports.deleteMe = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id, { active: false });
 
@@ -70,9 +75,8 @@ exports.createUser = (req, res) => {
   });
 };
 
-exports.getUser = factory.getOne(User)
+exports.getUser = factory.getOne(User);
 
 exports.updateUser = factory.updateOne(User);
 
 exports.deleteUser = factory.deleteOne(User);
-
