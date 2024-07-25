@@ -51,3 +51,21 @@ exports.createOne = Model =>
       }
     });
   });
+
+exports.getOne = (Model, populateOptions) =>
+  catchAsync(async (req, res, next) => {
+    let query = await Model.findById(req.params.id);
+    if (populateOptions) query = query.populate(populateOptions);
+    const document = await query;
+
+    if (!document) {
+      return next(new AppError('No tour find with that id', 404));
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        data: document
+      }
+    });
+  });
