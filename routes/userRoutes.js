@@ -10,6 +10,8 @@ router.post('/login', authController.login);
 
 router.patch('/updatePassword',authController.protect, authController.updatePassword);
 
+// Siwth params id with user id or some kind get data for current user
+router.get('/getMe', authController.protect, userController.getMe, userController.getUser);
 router.patch('/updateMe',authController.protect, userController.updateMe);
 router.delete('/deleteMe',authController.protect, userController.deleteMe);
 
