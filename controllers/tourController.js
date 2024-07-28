@@ -25,6 +25,9 @@ exports.getallTours = catchAsync(async (req, res, next) => {
     .sorting()
     .limitFields()
     .pagination();
+    // Explain is about more information for indexing and much more
+  // const tours = await features.query.expplain();
+
   const tours = await features.query;
 
   //Send Response
