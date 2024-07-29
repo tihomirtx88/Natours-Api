@@ -58,7 +58,7 @@ reviewSchema.pre(/^find/, function(next) {
 });
 
 // Building calculate rating static method witch one revice tour
-reviewSchema.statics.calcAvarageRating = async function(tourId) {
+reviewSchema.statics.calcAverageRating = async function(tourId) {
   const stats = await this.aggregate([
     {
       $match: { tour: tourId }
@@ -67,12 +67,10 @@ reviewSchema.statics.calcAvarageRating = async function(tourId) {
       $group: {
         _id: '$tour',
         nRating: { $sum: 1 },
-        avgRating: { $avg: '$raitng' }
+        avgRating: { $avg: '$rating' }
       }
     }
   ]);
-
-  console.log(stats);
 
   await Tour.findByIdAndUpdate(tourId, {
     // Cooming data
@@ -90,8 +88,23 @@ reviewSchema.statics.calcAvarageRating = async function(tourId) {
 
 //Call method after document are state save
 reviewSchema.post('save', function() {
-  // This point to current review
-  this.constructor.calcAvarageRating(this.tour);
+   // This point to current review
+  this.constructor.calcAverageRating(this.tour);
+});
+
+
+//findOneByIdAndDelete
+//findOneByIdAndDelete for all this hooks
+reviewSchema.pre(/^findOneAnd/, async function(next) {
+  // This points to current query because of the type of hook and with this.r sending from pre middleware to post middleware on bottom
+  this.r = await this.model.findOne(this.getQuery());
+  next();
+});
+
+reviewSchema.post(/^findOneAnd/, async function() {
+  if (this.r) {
+    await this.r.constructor.calcAverageRating(this.r.tour); 
+  }
 });
 
 const Review = model('Review', reviewSchema);
