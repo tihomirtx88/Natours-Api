@@ -25,7 +25,7 @@ exports.getallTours = catchAsync(async (req, res, next) => {
     .sorting()
     .limitFields()
     .pagination();
-    // Explain is about more information for indexing and much more
+  // Explain is about more information for indexing and much more
   // const tours = await features.query.expplain();
 
   const tours = await features.query;
@@ -40,7 +40,7 @@ exports.getallTours = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getSingleTour = factory.getOne(Tour, {path: 'reviews'});
+exports.getSingleTour = factory.getOne(Tour, { path: 'reviews' });
 
 // exports.getSingleTour = catchAsync(async (req, res, next) => {
 //   const tour = await Tour.findById(req.params.id).populate('reviews');
@@ -146,6 +146,37 @@ exports.getMontlyPlan = catchAsync(async (req, res, next) => {
     status: 'success',
     data: {
       plan
+    }
+  });
+});
+
+//'/tour-dstance/:distance/center/latlng/unit/:unit';
+
+exports.getTourDistance = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  const radios = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+
+  if (!lat || !lng) {
+    next(
+      new AppError(
+        'Please provide latitude and longitude in the format lat,lng',
+        400
+      )
+    );
+  }
+
+  const tours = await Tour.find({
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radios] } }
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      data: tours
     }
   });
 });

@@ -25,6 +25,8 @@ router
     tourController.getMontlyPlan
   );
 
+router.route('/tour-dstance/:distance/center/:latlng/unit/:unit').get(tourController.getTourDistance);
+
 router
   .route('/')
   .get(tourController.getallTours)
