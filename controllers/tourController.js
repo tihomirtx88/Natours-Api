@@ -158,7 +158,6 @@ exports.getTourDistance = catchAsync(async (req, res, next) => {
 
   const radios = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
 
-
   if (!lat || !lng) {
     next(
       new AppError(
@@ -180,3 +179,51 @@ exports.getTourDistance = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;//instead devide to 1000
+
+  if (!lat || !lng) {
+    next(
+      new AppError(
+        'Please provide latitude and longitude in the format lat,lng',
+        400
+      )
+    );
+  }
+
+  const distances = Tour.aggregate([
+    //First stage
+    {
+      $geoNear: {
+        // Some kind of start point
+        near: {
+          type: 'Poin',
+          coordinates: [lng, lat * 1]
+        },
+        distanceField: 'distance',
+        distanceMultiplier: multiplier 
+      }
+    },
+    // Second stage
+    {
+      // What field i want to keep and display
+      $project:{
+        distance: 1,
+        name: 1
+      }
+    }
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      data: distances
+    }
+  });
+});
+
+// sadsa
