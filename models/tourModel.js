@@ -134,6 +134,8 @@ const tourSchema = new mongoose.Schema(
 //Order price indexing in Acending order (1) or desending (-1), inprove scaning indexing from mongo for fast performance
 tourSchema.index({price: 1, ratingsAverage: -1});
 tourSchema.index({slug: 1});
+// Basicly we tell on mongoDB that startLocation must be index to this 2dsphere. that for geoLocation
+tourSchema.index({startLocation: '2dsphere'});
 
 // Virtual property
 tourSchema.virtual('durationWeeks').get(function() {
