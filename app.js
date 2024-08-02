@@ -80,7 +80,10 @@ async function start() {
   //3 .Mount ROUTES
   //Render template
   app.get('/', (req, res) => {
-    res.status(200).render('base');
+    res.status(200).render('base', {
+      tour: 'The Forest Hiker',
+      user: 'Tihomir'
+    });
   });
 
   app.use('/api/v1/tours', tourRouter);
