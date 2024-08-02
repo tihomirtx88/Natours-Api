@@ -18,6 +18,9 @@ const globalErrrorHandler = require('./controllers/errorController');
 //Routes
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const viewRouter = require('./routes/viewRoutes');
+
+//Template routes
 const reviewRouter = require('./routes/reviewRoutes');
 
 // Start app
@@ -78,30 +81,12 @@ async function start() {
   });
 
   //3 .Mount ROUTES
-  //Render template
-  app.get('/', (req, res) => {
-    res.status(200).render('base', {
-      tour: 'The Forest Hiker',
-      user: 'Tihomir'
-    });
-  });
-  
-  app.get('/overview', (req, res) => {
-    res.status(200).render('overview', {
-      title: 'All Tours'
-    });
-  });
-
-  app.get('/tour', (req, res) => {
-    res.status(200).render('tour', {
-      title: 'The Forest Hiker'
-    });
-  });
-  // 
 
   app.use('/api/v1/tours', tourRouter);
   app.use('/api/v1/users', userRouter);
   app.use('/api/v1/reviews', reviewRouter);
+  // Template routes
+  app.use('/',viewRouter);
 
   app.all('*', (req, res, next) => {
     next(new AppError(`Cant find ${req.originalUrl} on this server!`, 404));
