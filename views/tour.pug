@@ -1,6 +1,9 @@
 extends base
-
 include _reviewCard
+
+block append head
+  //- In this way i am inject this script in head block 
+  //- script(src='/js/mapBox.js')
 
 mixin overviewBox(label, text, icon)
   .overview-box__detail
@@ -60,7 +63,7 @@ block content
         img.picture-box__img(src=`/img/tours/${image}`, alt=`The Park Camper Tour ${index + 1}`, class=`picture-box__img--${idnex + 1}`)
 
   section.section-map
-    #map
+    #map(data-locations=`${JSON.stringify(tour.locations)}`)
 
   section.section-reviews
     .reviews
