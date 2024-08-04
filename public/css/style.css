@@ -619,12 +619,16 @@ body {
 
 .reviews {
   padding: 5rem 0;
-  display: grid;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  /* display: grid;
   grid-column-gap: 6rem;
   grid-auto-flow: column;
   overflow-x: scroll;
   -ms-scroll-snap-type: x mandatory;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x mandatory; */
 }
 .reviews__card {
   width: 30rem;
@@ -645,11 +649,11 @@ body {
   -ms-flex-align: center;
   align-items: center;
 }
-.reviews:before,
+/* .reviews:before,
 .reviews:after {
   content: '';
   width: 2rem;
-}
+} */
 .reviews__avatar {
   display: -webkit-box;
   display: -ms-flexbox;
