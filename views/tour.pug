@@ -2,8 +2,8 @@ extends base
 include _reviewCard
 
 block append head
-  //- In this way i am inject this script in head block 
-  //- script(src='/js/mapBox.js')
+  script(src='https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js')
+  link(href='https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css' rel='stylesheet')
 
 mixin overviewBox(label, text, icon)
   .overview-box__detail

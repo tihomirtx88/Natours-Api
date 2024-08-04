@@ -71,6 +71,7 @@ async function start() {
       'duration', 'ratingsQuantity', 'ratingsAverage', 'maxGroupSize', 'difficulty', 'price'
     ]
   }));
+  
 
   //Serving static files
   app.use(express.static(path.join(__dirname, 'public')));
