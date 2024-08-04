@@ -29,6 +29,7 @@ const app = express();
 start();
 
 async function start() {
+
   await databaseConfig(app);
  
   //Set the template engine
