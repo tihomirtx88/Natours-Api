@@ -10,6 +10,8 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
+const cors = require('cors')
 
 // Middlewares
 const AppError = require('./utils/apiError');
@@ -24,7 +26,10 @@ const viewRouter = require('./routes/viewRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 
 // Start app
+
 const app = express();
+app.use(cors())
+app.use(cookieParser());
 
 start();
 
@@ -39,7 +44,9 @@ async function start() {
   // 1.GLOBAL MIDDLEWARES
   
   //Set http secure header
-  app.use(helmet());
+  app.use(helmet({
+    contentSecurityPolicy: false,
+  }));
   
   //Development logging
   if (process.env.NODE_ENV === 'development') {
@@ -79,6 +86,7 @@ async function start() {
   // Custom test time middleware
   app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
+    console.log(req.cookies);
     next();
   });
 
