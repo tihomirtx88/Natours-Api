@@ -17,14 +17,16 @@ const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
     //Convert to milisecounds
-    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 20 * 60 * 60 * 1000),
-    httpOnly: true
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 20 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
   };
 
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
   res.cookie('jwt', token, cookieOptions);
-  
+
   //remove password from output
   user.password = undefined;
 
@@ -36,18 +38,6 @@ const createSendToken = (user, statusCode, res) => {
     }
   });
 };
-
-exports.signUp = catchAsync(async (req, res, next) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    role: req.body.role,
-    password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm
-  });
-
-  createSendToken(newUser, 201, res);
-});
 
 exports.login = catchAsync(async (req, res, next) => {
   // const email = req.body.email;
@@ -69,6 +59,19 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+exports.signUp = catchAsync(async (req, res, next) => {
+  const newUser = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    role: req.body.role,
+    password: req.body.password,
+    passwordConfirm: req.body.passwordConfirm
+  });
+
+  createSendToken(newUser, 201, res);
+});
+
+
 //Protect middleware
 exports.protect = catchAsync(async (req, res, next) => {
   //1. Getting token and check if is it there
@@ -79,7 +82,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
-  }else if(req.cookies.jwt){
+  } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
 
@@ -113,6 +116,39 @@ exports.protect = catchAsync(async (req, res, next) => {
   //Update user data access
   req.user = currentUser;
 
+  next();
+});
+
+//Only for rendered pages, no errors!
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      // Verify token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // Check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+
+      // Check if user changed password after the token was issued
+      if (currentUser.changePasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      // There is a logged-in user
+      res.locals.user = currentUser;
+      console.log('Current user set in res.locals:', currentUser); 
+
+      return next();
+    } catch (err) {
+      console.error('Error in isLoggedIn middleware:', err);
+    }
+  }
   next();
 });
 
@@ -208,7 +244,6 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');
 
   if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
-
     return next(new AppError('Your current password is wrong.', 401));
   }
 

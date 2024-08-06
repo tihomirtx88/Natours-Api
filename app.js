@@ -28,7 +28,10 @@ const reviewRouter = require('./routes/reviewRoutes');
 // Start app
 
 const app = express();
-app.use(cors())
+app.use(cors({
+  credentials: true
+}));
+
 app.use(cookieParser());
 
 start();
