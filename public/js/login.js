@@ -5,6 +5,7 @@ const login = async (email, password) => {
       headers: {
         'Content-Type': 'application/json'
       },
+      credentials: 'include', // Include credentials (cookies)
       body: JSON.stringify({
         email: email,
         password: password
