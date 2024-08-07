@@ -2,6 +2,37 @@ const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/apiError');
 const factory = require('./handlerFactory');
+const multer = require('multer');
+
+// Upload image functionality and settings
+
+const multerStorage  = multer.diskStorage({
+  destination: (req, file, callBack) => {
+    callBack(null, 'public/img/users', )
+  },
+  filename: (req, file, callBack) => {
+     //user- 21342dsf231231232-23432423.jpg example to be uniqe
+     const extension = file.mimetype.split('/')[1];
+     callBack(null, `user-${req.user.id}-${Date.now()}.${extension}`)
+  }
+});
+
+const multerFilter = (req, file, callBack) => {
+  //Basicly testing is it file image or not and pass error to top calback
+  if (file.mimetype.startsWith('image')) {
+    // Set to true
+    callBack(null, true);
+  }else{
+    callBack(new AppError('Not an image! Please upload only images!', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+
+exports.uploadUserImage = upload.single('photo');
 
 const filteredObj = (obj, ...allowedFields) => {
   const newObj = {};
