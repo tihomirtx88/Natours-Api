@@ -21,7 +21,12 @@ const createSendToken = (user, statusCode, res) => {
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 20 * 60 * 60 * 1000
     ),
     httpOnly: true,
+    sameSite: 'None',
+    secure: true,
+    partitioned: true
   };
+
+  console.log('here ');
 
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
@@ -59,6 +64,17 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedOut', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+
+  res.status(200).json({
+    status: 'success'
+  });
+};
+
 exports.signUp = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -70,7 +86,6 @@ exports.signUp = catchAsync(async (req, res, next) => {
 
   createSendToken(newUser, 201, res);
 });
-
 
 //Protect middleware
 exports.protect = catchAsync(async (req, res, next) => {
@@ -120,7 +135,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 
 //Only for rendered pages, no errors!
-exports.isLoggedIn = catchAsync(async (req, res, next) => {
+exports.isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {
     try {
       // Verify token
@@ -142,15 +157,16 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
 
       // There is a logged-in user
       res.locals.user = currentUser;
-      console.log('Current user set in res.locals:', currentUser); 
+      console.log('Current user set in res.locals:', currentUser);
 
       return next();
     } catch (err) {
       console.error('Error in isLoggedIn middleware:', err);
+      return next();
     }
   }
   next();
-});
+};
 
 exports.restrictTo = (...roles) => {
   //roles: [admin, lead-guide], role=user and this middleware have access to roles parametars beacse there is a closer because

@@ -3,14 +3,18 @@ const login = async (email, password) => {
     const res = await fetch('http://127.0.0.1:3000/api/v1/users/login', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+
       },
       credentials: 'include', // Include credentials (cookies)
       body: JSON.stringify({
         email: email,
         password: password
-      })
+      })  
     });
+
+    const cookies = res.headers.get('Set-Cookie');
+    console.log('Cookies from response:', cookies);
 
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
