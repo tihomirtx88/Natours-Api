@@ -25,7 +25,7 @@ router.use(authController.protect);
 
 // Siwth params id with user id or some kind get data for current user
 router.get('/getMe', userController.getMe, userController.getUser);
-router.patch('/updateMe', userController.uploadUserImage, userController.updateMe);
+router.patch('/updateMe', userController.uploadUserImage, userController.resizeUserPhoto, userController.updateMe);
 router.delete('/deleteMe', userController.deleteMe);
 
 router.use(authController.restrictTo('admin'));

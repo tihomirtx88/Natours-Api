@@ -3,27 +3,33 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/apiError');
 const factory = require('./handlerFactory');
 const multer = require('multer');
+const sharp = require('sharp');
 
 // Upload image functionality and settings
 
-const multerStorage  = multer.diskStorage({
-  destination: (req, file, callBack) => {
-    callBack(null, 'public/img/users', )
-  },
-  filename: (req, file, callBack) => {
-     //user- 21342dsf231231232-23432423.jpg example to be uniqe
-     const extension = file.mimetype.split('/')[1];
-     callBack(null, `user-${req.user.id}-${Date.now()}.${extension}`)
-  }
-});
+// const multerStorage  = multer.diskStorage({
+//   destination: (req, file, callBack) => {
+//     callBack(null, 'public/img/users', )
+//   },
+//   filename: (req, file, callBack) => {
+//      //user- 21342dsf231231232-23432423.jpg example to be uniqe
+//      const extension = file.mimetype.split('/')[1];
+//      callBack(null, `user-${req.user.id}-${Date.now()}.${extension}`)
+//   }
+// });
+
+const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, callBack) => {
   //Basicly testing is it file image or not and pass error to top calback
   if (file.mimetype.startsWith('image')) {
     // Set to true
     callBack(null, true);
-  }else{
-    callBack(new AppError('Not an image! Please upload only images!', 400), false);
+  } else {
+    callBack(
+      new AppError('Not an image! Please upload only images!', 400),
+      false
+    );
   }
 };
 
@@ -34,6 +40,23 @@ const upload = multer({
 
 exports.uploadUserImage = upload.single('photo');
 
+// Rezie image functionality
+
+exports.resizeUserPhoto = (req, res, next) => {
+  if (!req.file) return next();
+
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+  //Because using multer.memoryStorage() instead local storage
+  sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+};
+
 const filteredObj = (obj, ...allowedFields) => {
   const newObj = {};
   Object.keys(obj).forEach(el => {
@@ -43,7 +66,7 @@ const filteredObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-// Get data for current user 
+// Get data for current user
 exports.getMe = catchAsync(async (req, res, next) => {
   req.params.id = req.user.id;
   next();
@@ -63,7 +86,6 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
 });
 
 exports.updateMe = catchAsync(async (req, res, next) => {
-  
   //1. Create error if user POSTs password data
   if (req.body.password || req.body.passwordConfirm) {
     return next(
@@ -76,7 +98,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   //2. filtered out unwanted fields names that are not allowedto be updated
   const filteredBody = filteredObj(req.body, 'name', 'email');
-  if(req.file) filteredBody.photo = req.file.filename;
+  if (req.file) filteredBody.photo = req.file.filename;
 
   //3. Update user document
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
