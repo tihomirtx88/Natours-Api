@@ -130,6 +130,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   //Update user data access
   req.user = currentUser;
+  res.locals.user = currentUser;
 
   next();
 });

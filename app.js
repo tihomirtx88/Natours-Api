@@ -36,6 +36,10 @@ async function start() {
 
   //Body parser, reading data from body
   app.use(express.json());
+  app.use(express.urlencoded({
+    extended: true,
+    limit: '10kb'
+  }));
   app.use(cookieParser());
   app.use(
     cors({
