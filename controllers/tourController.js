@@ -4,11 +4,47 @@ const APIFeatures = require('./../utils/APIFeaturingTour');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/apiError');
 const factory = require('./handlerFactory');
+const multer = require('multer');
+const sharp = require('sharp');
 
 //Middleware for reading data from json dev file
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 // );
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, callBack) => {
+  //Basicly testing is it file image or not and pass error to top calback
+  if (file.mimetype.startsWith('image')) {
+    // Set to true
+    callBack(null, true);
+  } else {
+    callBack(
+      new AppError('Not an image! Please upload only images!', 400),
+      false
+    );
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+
+exports.uploadTourImages = upload.fields([
+  {name: 'imageCover', maxCount: 1},
+  {name: 'images', maxCount: 3}
+]);
+
+// upload.single('image');  req.file
+// upload.array('images', 5);  req.files
+
+exports.resizeTourimages = (req, res, next ) => {
+  if (!req.file) return next();
+
+
+};
 
 // Prefilling query string
 exports.aliasTopTours = (req, res, next) => {
@@ -184,7 +220,7 @@ exports.getDistances = catchAsync(async (req, res, next) => {
   const { latlng, unit } = req.params;
   const [lat, lng] = latlng.split(',');
 
-  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;//instead devide to 1000
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001; //instead devide to 1000
 
   if (!lat || !lng) {
     next(
@@ -205,13 +241,13 @@ exports.getDistances = catchAsync(async (req, res, next) => {
           coordinates: [lng, lat * 1]
         },
         distanceField: 'distance',
-        distanceMultiplier: multiplier 
+        distanceMultiplier: multiplier
       }
     },
     // Second stage
     {
       // What field i want to keep and display
-      $project:{
+      $project: {
         distance: 1,
         name: 1
       }
