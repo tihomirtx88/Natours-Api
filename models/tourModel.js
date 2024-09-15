@@ -97,7 +97,7 @@ const tourSchema = new mongoose.Schema(
         default: 'Point',
         enum: ['Point']
       },
-      cordinates: [Number],
+      coordinates: [Number],
       address: String,
       description: String
     },
@@ -188,9 +188,7 @@ tourSchema.pre(/^find/, function(next) {
 
 // Affter all middlewares are exexuted
 tourSchema.post(/^find/, function(docs, next) {
-  console.log(`Query took ${Date.now() - this.start} milliesecodns`);
-
-  // console.log(docs);
+  // console.log(`Query took ${Date.now() - this.start} milliesecodns`);
 
   next();
 });

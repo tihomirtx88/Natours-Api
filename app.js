@@ -41,11 +41,13 @@ async function start() {
     limit: '10kb'
   }));
   app.use(cookieParser());
+  const corsOptions = {
+    origin: ['http://localhost:3000', 'http://localhost:5173'], // Add the allowed origins here
+    optionsSuccessStatus: 200,
+    credentials: true
+  };
   app.use(
-    cors({
-      origin: 'http://localhost:3000', // Replace with your frontend domain
-      credentials: true
-    })
+    cors(corsOptions)
   );
 
   //Set the template engine
