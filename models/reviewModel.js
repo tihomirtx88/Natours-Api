@@ -42,7 +42,7 @@ const reviewSchema = new mongoose.Schema(
 
 reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
-reviewSchema.pre(/^find/, function(next) {
+reviewSchema.pre(/^find/, function() {
   // this.populate({
   //   path: 'tour',
   //   select: 'name'
@@ -56,7 +56,6 @@ reviewSchema.pre(/^find/, function(next) {
     select: 'name photo'
   });
 
-  next();
 });
 
 // Building calculate rating static method witch one revice tour
@@ -69,10 +68,13 @@ reviewSchema.statics.calcAverageRating = async function(tourId) {
       $group: {
         _id: '$tour',
         nRating: { $sum: 1 },
-        avgRating: { $avg: '$rating' }
+        avgRating: { $avg: '$raitng' }
       }
     }
   ]);
+
+  console.log(stats);
+  
 
   await Tour.findByIdAndUpdate(tourId, {
     // Cooming data
@@ -83,6 +85,7 @@ reviewSchema.statics.calcAverageRating = async function(tourId) {
     //     avgRating: 3.257142857142857
     //   }
     // ]
+    
     ratingsQuantity: stats[0].nRating,
     ratingsAverage: stats[0].avgRating
   });

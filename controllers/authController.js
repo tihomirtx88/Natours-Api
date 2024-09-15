@@ -26,7 +26,7 @@ const createSendToken = (user, statusCode, res) => {
     partitioned: true
   };
 
-  console.log('here ');
+
 
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
@@ -158,7 +158,6 @@ exports.isLoggedIn = async (req, res, next) => {
 
       // There is a logged-in user
       res.locals.user = currentUser;
-      console.log('Current user set in res.locals:', currentUser);
 
       return next();
     } catch (err) {
