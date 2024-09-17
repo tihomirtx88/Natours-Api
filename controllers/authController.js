@@ -76,15 +76,20 @@ exports.logout = (req, res) => {
 };
 
 exports.signUp = catchAsync(async (req, res, next) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    role: req.body.role,
-    password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm
-  });
+  try {
+    const newUser = await User.create({
+      name: req.body.name,
+      email: req.body.email,
+      role: req.body.role,
+      password: req.body.password,
+      passwordConfirm: req.body.passwordConfirm
+    });
 
-  createSendToken(newUser, 201, res);
+    createSendToken(newUser, 201, res);
+  } catch (error) {
+    console.error('Error during user registration:', error);
+    return next(new AppError('Error during user registration', 400));
+  }
 });
 
 //Protect middleware
