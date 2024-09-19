@@ -1,5 +1,5 @@
 const express = require('express');
-const databaseConfig = require(`./config/db`);
+const databaseConfig = require('./config/db');
 
 const path = require('path');
 
@@ -17,76 +17,73 @@ const cors = require('cors');
 const AppError = require('./utils/apiError');
 const globalErrrorHandler = require('./controllers/errorController');
 
-//Routes
+// Routes
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const viewRouter = require('./routes/viewRoutes');
-
-//Template routes
 const reviewRouter = require('./routes/reviewRoutes');
 
 // Start app
-
 const app = express();
 
-start();
-
 async function start() {
+  const corsOptions = {
+    origin: ['http://localhost:3000', 'http://localhost:5173'], 
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], 
+    allowedHeaders: ['Content-Type', 'Authorization'], 
+    credentials: true 
+  };
+  
+  // Apply CORS middleware
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions)); 
   await databaseConfig(app);
 
-  //Body parser, reading data from body
+  // Body parser, reading data from body
   app.use(express.json());
   app.use(express.urlencoded({
     extended: true,
     limit: '10kb'
   }));
   app.use(cookieParser());
-  const corsOptions = {
-    origin: ['http://localhost:3000', 'http://localhost:5173'], // Add the allowed origins here
-    optionsSuccessStatus: 200,
-    credentials: true
-  };
-  app.use(
-    cors(corsOptions)
-  );
 
-  //Set the template engine
+  // Set the template engine
   app.set('view engine', 'pug');
   app.set('views', path.join(__dirname, 'views'));
 
-  // 1.GLOBAL MIDDLEWARES
+  // 1. GLOBAL MIDDLEWARES
 
-  //Set http secure header
+  // Set http secure header
   app.use(
     helmet({
       contentSecurityPolicy: false
     })
   );
 
-  //Development logging
+  // Development logging
   if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
   }
 
-  //Middleware witch one limit the request from client to server
+  // Middleware which limits requests from client to server
   const limiter = rateLimit({
     max: 1000,
-    windowMs: 60 * 60 * 100,
-    message: 'To many request from this IP, please try again in hour'
+    windowMs: 60 * 60 * 1000, // Fixed the value to 1 hour
+    message: 'Too many requests from this IP, please try again in an hour'
   });
 
   app.use('/api', limiter);
 
-  //Data sanitanization against NoSQLquery injection
+  // Data sanitization against NoSQL query injection
   app.use(mongoSanitize());
 
-  //Data sanitanization against XSS
+  // Data sanitization against XSS
   app.use(xss());
 
-  //Prevent parameter pollution
+  // Prevent parameter pollution
   app.use(
     hpp({
-      // Simple array from properties with one allowed to dublicate query string
+      // Simple array from properties with one allowed to duplicate query string
       whitelist: [
         'duration',
         'ratingsQuantity',
@@ -98,7 +95,7 @@ async function start() {
     })
   );
 
-  //Serving static files
+  // Serving static files
   app.use(express.static(path.join(__dirname, 'public')));
 
   // Custom test time middleware
@@ -107,7 +104,7 @@ async function start() {
     next();
   });
 
-  //3 .Mount ROUTES
+  // 3. MOUNT ROUTES
 
   // Template routes
   app.use('/', viewRouter);
@@ -117,11 +114,13 @@ async function start() {
   app.use('/api/v1/reviews', reviewRouter);
 
   app.all('*', (req, res, next) => {
-    next(new AppError(`Cant find ${req.originalUrl} on this server!`, 404));
+    next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
   });
 
-  //Error middleware
+  // Error middleware
   app.use(globalErrrorHandler);
 }
+
+start();
 
 module.exports = app;
