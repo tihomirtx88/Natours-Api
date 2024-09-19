@@ -49,10 +49,15 @@ exports.resizeUserPhoto = (req, res, next) => {
 
   //Because using multer.memoryStorage() instead local storage
   sharp(req.file.buffer)
-    .resize(500, 500)
-    .toFormat('jpg')
-    .jpg({ quality: 90 })
-    .toFile(`public/img/users/${req.file.filename}`);
+  .resize(500, 500)
+  .toFormat('jpg')
+  .toFile(`public/img/users/${req.file.filename}`, (err, info) => {
+    if (err) {
+      console.error('Error saving file:', err);
+      return next(err);
+    }
+    console.log('File saved:', info);
+  });
 
   next();
 };
@@ -99,6 +104,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   //2. filtered out unwanted fields names that are not allowedto be updated
   const filteredBody = filteredObj(req.body, 'name', 'email');
   if (req.file) filteredBody.photo = req.file.filename;
+  console.log(filteredBody, 'from filtered body');
+  
 
   //3. Update user document
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
