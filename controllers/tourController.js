@@ -40,11 +40,27 @@ exports.uploadTourImages = upload.fields([
 // upload.single('image');  req.file
 // upload.array('images', 5);  req.files
 
-exports.resizeTourimages = (req, res, next ) => {
-  if (!req.file) return next();
+exports.resizeTourimages = catchAsync(async (req, res, next ) => {
+  if (!req.files.imageCover || !req,files.images) return next();
 
+  // 1. Cover image
 
-};
+  await sharp(req.file.buffer)
+  .resize(500, 500)
+  .toFormat('jpg')
+  .toFile(`public/img/users/${req.file.filename}`, (err, info) => {
+    if (err) {
+      console.error('Error saving file:', err);
+      return next(err);
+    }
+    console.log('File saved:', info);
+  });
+
+  // 2. Images
+
+  next();
+
+});
 
 // Prefilling query string
 exports.aliasTopTours = (req, res, next) => {
