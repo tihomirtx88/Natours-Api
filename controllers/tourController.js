@@ -33,33 +33,49 @@ const upload = multer({
 });
 
 exports.uploadTourImages = upload.fields([
-  {name: 'imageCover', maxCount: 1},
-  {name: 'images', maxCount: 3}
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 }
 ]);
 
 // upload.single('image');  req.file
 // upload.array('images', 5);  req.files
 
-exports.resizeTourimages = catchAsync(async (req, res, next ) => {
-  if (!req.files.imageCover || !req,files.images) return next();
+exports.resizeTourimages = catchAsync(async (req, res, next) => {
+  if (!req.files.imageCover || !req.files.images) return next();
+
+  console.log(req.files);
 
   // 1. Cover image
+  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpg`;
 
-  await sharp(req.file.buffer)
-  .resize(500, 500)
-  .toFormat('jpg')
-  .toFile(`public/img/users/${req.file.filename}`, (err, info) => {
-    if (err) {
-      console.error('Error saving file:', err);
-      return next(err);
-    }
-    console.log('File saved:', info);
-  });
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpg')
+    .toFile(`public/img/tours/${req.body.imageCover}`, (err, info) => {
+      if (err) {
+        console.error('Error saving file:', err);
+        return next(err);
+      }
+      console.log('File saved:', info);
+    });
 
   // 2. Images
+  req.body.images = [];
+
+  await Promise.all(
+    req.files.images.map(async (file, index) => {
+      const filename = `tour-${req.params.id}-${Date.now()}-${index + 1}.jpg`;
+
+      await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat('jpg')
+        .toFile(`public/img/tours/${filename}`);
+
+      req.body.images.push(filename);
+    })
+  );
 
   next();
-
 });
 
 // Prefilling query string
