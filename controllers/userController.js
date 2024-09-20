@@ -42,13 +42,13 @@ exports.uploadUserImage = upload.single('photo');
 
 // Rezie image functionality
 
-exports.resizeUserPhoto = (req, res, next) => {
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpg`;
 
-  //Because using multer.memoryStorage() instead local storage
-  sharp(req.file.buffer)
+  //Because using multer.memoryStorage() instead local storage, also return promise
+  await sharp(req.file.buffer)
   .resize(500, 500)
   .toFormat('jpg')
   .toFile(`public/img/users/${req.file.filename}`, (err, info) => {
@@ -60,7 +60,7 @@ exports.resizeUserPhoto = (req, res, next) => {
   });
 
   next();
-};
+});
 
 const filteredObj = (obj, ...allowedFields) => {
   const newObj = {};
