@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/apiError');
-const sendEmail = require('./../utils/email');
+const Email = require('./../utils/email');
 const bcrypt = require('bcryptjs');
 
 const signToken = id => {
@@ -77,13 +77,9 @@ exports.logout = (req, res) => {
 
 exports.signUp = catchAsync(async (req, res, next) => {
   try {
-    const newUser = await User.create({
-      name: req.body.name,
-      email: req.body.email,
-      role: req.body.role,
-      password: req.body.password,
-      passwordConfirm: req.body.passwordConfirm
-    });
+    const newUser = await User.create(req.body);
+    const url = `${req.protocol}://${req.get('host')}/profile`;
+    await new Email(newUser, url).sendWelcome();
 
     createSendToken(newUser, 201, res);
   } catch (error) {
@@ -208,11 +204,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const message = `Forgot yor password? Submit a PATCH requiest with your new password and passwordConfirm to: ${resetURL}. \n If you did not forget your password, please ignore this email`;
 
   try {
-    await sendEmail({
-      email: 'retha.walsh@ethereal.email',
-      subject: 'Your password reset token (valid for 10 min)',
-      message
-    });
+    // await sendEmail({
+    //   email: 'retha.walsh@ethereal.email',
+    //   subject: 'Your password reset token (valid for 10 min)',
+    //   message
+    // });
 
     res.status(200).json({
       status: 'success',
