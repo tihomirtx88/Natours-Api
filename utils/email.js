@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 // clea
 const renderWelcomeEmail = require('./renderWelcomeEmail'); 
+const renderPasswordResetEmail = require('./renderPasswordResetEmail');
 
 module.exports = class Email {
   constructor(user, url) {
@@ -29,9 +30,12 @@ module.exports = class Email {
   }
 
   // Send actual email
-  async send(template, subject) {
+  async send( template, subject) {
     // 1. Render HTML
-    const html = renderWelcomeEmail(this.firstName, this.url);
+    const html =
+    template === 'welcome'
+      ? renderWelcomeEmail(this.firstName, this.url)
+      : renderPasswordResetEmail(this.firstName, this.url);
 
 
     // 2. Define email options
@@ -50,5 +54,9 @@ module.exports = class Email {
 
   async sendWelcome() {
     await this.send('welcome', 'Welcome to the Natours Family!');
+  }
+
+  async sendPasswordReset() {
+    await this.send('passwordReset', 'Your password reset token (valid for 10 minutes)');
   }
 };

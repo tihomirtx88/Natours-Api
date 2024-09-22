@@ -21,6 +21,7 @@ const WelcomeEmail = ({ firstName, url }) => (
           Upload your user photo
         </a>
         <p>If you need help booking your next tour, feel free to contact us!</p>
+
       </div>
     </body>
   </html>
