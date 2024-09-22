@@ -1,5 +1,8 @@
 const express = require('express');
 const databaseConfig = require('./config/db');
+require('@babel/register')({
+  presets: ['@babel/preset-env', '@babel/preset-react']
+});
 
 const path = require('path');
 
