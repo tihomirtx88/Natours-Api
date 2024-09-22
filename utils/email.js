@@ -12,7 +12,7 @@ module.exports = class Email {
 
   newTransport() {
     if (process.env.NODE_ENV === 'production') {
-      return 1; 
+      return 1;
     }
 
     return nodemailer.createTransport({
@@ -28,13 +28,20 @@ module.exports = class Email {
     });
   }
 
+  // Render React component as HTML string
+  renderEmailComponent(Component, props) {
+    const componentHTML = ReactDOMServer.renderToStaticMarkup(
+      React.createElement(Component, props)
+    );
+    return `<!doctype html>${componentHTML}`;
+  }
+
   // Send actual email
-  async send(template, subject) {
+  async send(Component, subject) {
     // 1. Render HTML
-    const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
+    const html = this.renderEmailComponent(Component, {
       firstName: this.firstName,
       url: this.url,
-      subject
     });
 
     // 2. Define email options
