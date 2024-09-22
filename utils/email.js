@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
-const pug = require('pug');
-const htmlToText = require('html-to-text');
+// clea
+const renderWelcomeEmail = require('./renderWelcomeEmail'); 
 
 module.exports = class Email {
   constructor(user, url) {
@@ -28,21 +28,11 @@ module.exports = class Email {
     });
   }
 
-  // Render React component as HTML string
-  renderEmailComponent(Component, props) {
-    const componentHTML = ReactDOMServer.renderToStaticMarkup(
-      React.createElement(Component, props)
-    );
-    return `<!doctype html>${componentHTML}`;
-  }
-
   // Send actual email
-  async send(Component, subject) {
+  async send(template, subject) {
     // 1. Render HTML
-    const html = this.renderEmailComponent(Component, {
-      firstName: this.firstName,
-      url: this.url,
-    });
+    const html = renderWelcomeEmail(this.firstName, this.url);
+
 
     // 2. Define email options
     const mailOptions = {
@@ -50,7 +40,8 @@ module.exports = class Email {
       to: this.to,
       subject: subject,
       html,
-      text: htmlToText.fromString(html)
+      // text: htmlToText.fromString(html)
+      text: html.replace(/<[^>]*>/g, ''),
     };
 
     // 3. Create a transport and send email

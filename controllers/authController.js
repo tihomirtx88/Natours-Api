@@ -79,6 +79,8 @@ exports.signUp = catchAsync(async (req, res, next) => {
   try {
     const newUser = await User.create(req.body);
     const url = `${req.protocol}://${req.get('host')}/profile`;
+
+    // Send the welcome email using the JSX template
     await new Email(newUser, url).sendWelcome();
 
     createSendToken(newUser, 201, res);
