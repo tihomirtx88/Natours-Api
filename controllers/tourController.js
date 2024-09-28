@@ -1,4 +1,3 @@
-const fs = require('fs');
 const Tour = require('../models/tourModel');
 const APIFeatures = require('./../utils/APIFeaturingTour');
 const catchAsync = require('./../utils/catchAsync');
