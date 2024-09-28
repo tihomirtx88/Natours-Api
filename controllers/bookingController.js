@@ -53,28 +53,10 @@ exports.createBookingCheckout = catchAsync(async (req, res, next) => {
   res.redirect(req.originalUrl.split('?')[0]);
 });
 
-exports.createBooking = catchAsync(async (req, res, next) => {
-  // 1. Get the tour from the request body
-  const { tourId, price } = req.body;
-
-  // 2. Check if the tour exists
-  const tour = await Tour.findById(tourId);
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  const booking = await Booking.create({
-    tour: tour._id,
-    user: req.user.id, // Assuming user is authenticated and req.user contains user info
-    price: price || tour.price
-  });
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      booking
-    }
-  });
-});
+exports.getBooking = factory.getOne(Booking);
+exports.getAllBookings = factory.getAll(Booking);
+exports.updateBooking = factory.updateOne(Booking);
+exports.deleteBooking = factory.deleteOne(Booking);
+exports.createBooking = factory.createOne(Booking);
 
 
