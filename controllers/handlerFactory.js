@@ -52,6 +52,24 @@ exports.createOne = Model =>
     });
   });
 
+exports.getAll = Model =>
+  catchAsync(async (req, res, next) => {
+    // 1. Building the query
+    let query = Model.find();
+
+    // 2. Execute the query
+    const documents = await query;
+
+    // 3. Send response
+    res.status(200).json({
+      status: 'success',
+      results: documents.length,
+      data: {
+        data: documents
+      }
+    });
+  });
+
 exports.getOne = (Model, populateOptions) =>
   catchAsync(async (req, res, next) => {
     let query = await Model.findById(req.params.id);
