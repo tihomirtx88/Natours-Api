@@ -36,6 +36,8 @@ const {
         path: 'tour',
         select: 'name'
     });
+
+    next();
   });
   
   const Booking = model('Booking', bookingSchema);
