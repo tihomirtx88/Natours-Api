@@ -1,6 +1,5 @@
 const {
     model,
-    Schema,
     Types: { ObjectId },
     default: mongoose
   } = require('mongoose');
