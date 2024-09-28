@@ -1,4 +1,5 @@
 const Tour = require('../models/tourModel');
+const Booking = require('../models/bookingModel');
 const APIFeatures = require('./../utils/APIFeaturingTour');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/apiError');
@@ -293,4 +294,18 @@ exports.getDistances = catchAsync(async (req, res, next) => {
   });
 });
 
-// sadsa
+exports.getMyTours = catchAsync(async (req, res, next) => {
+  // Find all booking
+  const bookings = await Booking.find({ user: req.user.id });
+
+  // Find tours with the returned ids
+  const tourIDs = bookings.map(el => el.tour.id);
+  const tours = await Tour.find({ _id: { $in: tourIDs } });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      tours
+    }
+  });
+});
