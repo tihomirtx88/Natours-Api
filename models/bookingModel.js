@@ -46,6 +46,16 @@ const bookingSchema = new mongoose.Schema({
   }
 });
 
+// Populate user and tour details when querying bookings
+bookingSchema.pre(/^find/, function(next) {
+  this.populate('user', 'name email')  // Populate user's name and email
+      .populate({
+        path: 'tour', 
+        select: 'name price duration difficulty'  // Populate relevant tour details
+      });
+  next();
+});
+
 // Middleware to set booking price based on the tour's price
 bookingSchema.pre('save', async function(next) {
   if (!this.isModified('price')) return next();
@@ -75,16 +85,6 @@ bookingSchema.pre('save', async function(next) {
   if (bookedCount >= tour.maxGroupSize) {
     return next(new Error('The tour is fully booked!'));
   }
-
-  next();
-});
-
-// Populate user and tour details when querying bookings
-bookingSchema.pre(/^find/, function(next) {
-  this.populate('user').populate({
-    path: 'tour',
-    select: 'name price duration difficulty'
-  });
 
   next();
 });
