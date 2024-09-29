@@ -51,7 +51,7 @@ bookingSchema.pre(/^find/, function(next) {
   this.populate('user', 'name email')  // Populate user's name and email
       .populate({
         path: 'tour', 
-        select: 'name price duration difficulty'  // Populate relevant tour details
+        select: 'name price duration difficulty imageCover images startLocation maxGroupSize'  // Populate relevant tour details
       });
   next();
 });
