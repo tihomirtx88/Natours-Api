@@ -5,6 +5,7 @@ const {
 } = require('mongoose');
 
 const Tour = require('./tourModel');
+const validator = require('validator');
 
 const bookingSchema = new mongoose.Schema({
   tour: {
@@ -28,6 +29,20 @@ const bookingSchema = new mongoose.Schema({
   paid: {
     type: Boolean,
     default: true
+  },
+  fullName: {
+    type: String,
+    required: [true, 'Booking must have a full name']
+  },
+  email: {
+    type: String,
+    required: [true, 'Booking must have an email'],
+    validate: [validator.isEmail, 'Please provide a valid email address']
+  },
+  groupSize: {
+    type: String,
+    required: [true, 'Please choose a group size'],
+    enum: ['small', 'large']
   }
 });
 
