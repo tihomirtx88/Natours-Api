@@ -43,6 +43,11 @@ const bookingSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please choose a group size'],
     enum: ['small', 'large']
+  },
+  participants: {
+    type: Number,
+    required: [true, 'Booking must specify the number of participants'],
+    min: [1, 'There must be at least one participant']
   }
 });
 
@@ -51,7 +56,7 @@ bookingSchema.pre(/^find/, function(next) {
   this.populate('user', 'name email')  // Populate user's name and email
       .populate({
         path: 'tour', 
-        select: 'name price duration difficulty imageCover images startLocation maxGroupSize'  // Populate relevant tour details
+        select: 'name price duration difficulty imageCover images startLocation maxGroupSize, startDates'  // Populate relevant tour details
       });
   next();
 });
