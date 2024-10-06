@@ -42,7 +42,34 @@ exports.createOne = Model =>
     // const newTour = new Tour();
     // newTour.save();
 
-    const newDocument = await Model.create(req.body);
+    const newTourData = {
+      name: req.body.name,
+      slug: req.body.slug,
+      duration: req.body.duration,
+      maxGroupSize: req.body.maxGroupSize,
+      difficulty: req.body.difficulty,
+      price: req.body.price,
+      priceDiscount: req.body.priceDiscount,
+      summary: req.body.summary,
+      description: req.body.description,
+      secretTour: req.body.secretTour,
+      startLocation: {
+        description: req.body.startLocationDescription,
+        coordinates: req.body.coordinates ? JSON.parse(req.body.coordinates) : undefined,
+      },
+      startDates: req.body.startDates ? JSON.parse(req.body.startDates) : undefined,
+    };
+
+    // Handle images
+    if (req.files && req.files.imageCover) {
+      newTourData.imageCover = req.files.imageCover[0].buffer; // Store image buffer
+    }
+  
+    if (req.files && req.files.images) {
+      newTourData.images = req.files.images.map(file => file.buffer); // Store array of image buffers
+    }
+
+    const newDocument = await Model.create(newTourData);
 
     res.status(201).json({
       status: 'success',

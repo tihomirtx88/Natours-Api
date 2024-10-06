@@ -37,8 +37,7 @@ exports.uploadTourImages = upload.fields([
   { name: 'images', maxCount: 3 }
 ]);
 
-// upload.single('image');  req.file
-// upload.array('images', 5);  req.files
+
 
 exports.resizeTourimages = catchAsync(async (req, res, next) => {
   if (!req.files.imageCover || !req.files.images) return next();
@@ -46,6 +45,10 @@ exports.resizeTourimages = catchAsync(async (req, res, next) => {
   console.log(req.files);
 
   // 1. Cover image
+  if (!req.files || !req.files.imageCover || !req.files.images) {
+    return next(new AppError('Images are required!', 400));
+  }
+
   req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpg`;
 
   await sharp(req.files.imageCover[0].buffer)
@@ -125,7 +128,60 @@ exports.getSingleTour = factory.getOne(Tour, { path: 'reviews' });
 //   });
 // });
 
-exports.createTour = factory.createOne(Tour);
+// exports.createTour = factory.createOne(Tour);
+
+exports.createTour = catchAsync(async (req, res, next) => {
+  // Prepare the data for creating a new tour
+  const newTourData = {
+    name: req.body.name,
+    slug: req.body.slug,
+    duration: req.body.duration,
+    maxGroupSize: req.body.maxGroupSize,
+    difficulty: req.body.difficulty,
+    price: req.body.price,
+    priceDiscount: req.body.priceDiscount,
+    summary: req.body.summary,
+    description: req.body.description,
+    secretTour: req.body.secretTour,
+    startLocation: {
+      description: req.body.startLocationDescription,
+      coordinates: req.body.coordinates ? JSON.parse(req.body.coordinates) : undefined,
+    },
+    startDates: req.body.startDates ? JSON.parse(req.body.startDates) : undefined,
+  };
+
+  // Handle images
+  if (req.files && req.files.imageCover) {
+    newTourData.imageCover = `tour-${Date.now()}-cover.jpg`;
+    await sharp(req.files.imageCover[0].buffer)
+      .resize(2000, 1333)
+      .toFormat('jpg')
+      .toFile(`public/img/tours/${newTourData.imageCover}`);
+  }
+
+  if (req.files && req.files.images) {
+    newTourData.images = [];
+    await Promise.all(
+      req.files.images.map(async (file, index) => {
+        const filename = `tour-${Date.now()}-${index + 1}.jpg`;
+        await sharp(file.buffer)
+          .resize(2000, 1333)
+          .toFormat('jpg')
+          .toFile(`public/img/tours/${filename}`);
+        newTourData.images.push(filename);
+      })
+    );
+  }
+
+  const newDocument = await Tour.create(newTourData);
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      data: newDocument
+    }
+  });
+});
 
 exports.updateTour = factory.updateOne(Tour);
 
