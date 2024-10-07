@@ -42,7 +42,6 @@ exports.uploadTourImages = upload.fields([
 exports.resizeTourimages = catchAsync(async (req, res, next) => {
   if (!req.files.imageCover || !req.files.images) return next();
 
-  console.log(req.files);
 
   // 1. Cover image
   if (!req.files || !req.files.imageCover || !req.files.images) {
@@ -130,7 +129,63 @@ exports.getSingleTour = factory.getOne(Tour, { path: 'reviews' });
 
 // exports.createTour = factory.createOne(Tour);
 
+// exports.createTour = catchAsync(async (req, res, next) => {
+//   // Prepare the data for creating a new tour
+//   const newTourData = {
+//     name: req.body.name,
+//     slug: req.body.slug,
+//     duration: req.body.duration,
+//     maxGroupSize: req.body.maxGroupSize,
+//     difficulty: req.body.difficulty,
+//     price: req.body.price,
+//     priceDiscount: req.body.priceDiscount,
+//     summary: req.body.summary,
+//     description: req.body.description,
+//     secretTour: req.body.secretTour,
+//     startLocation: {
+//       description: req.body.startLocationDescription,
+//       coordinates: req.body.coordinates ? JSON.parse(req.body.coordinates) : undefined,
+//     },
+//     startDates: req.body.startDates ? JSON.parse(req.body.startDates) : undefined,
+//   };
+
+//   console.log(newTourData, 'from server');
+  
+
+//   // Handle images
+//   if (req.files && req.files.imageCover) {
+//     newTourData.imageCover = `tour-${Date.now()}-cover.jpg`;
+//     await sharp(req.files.imageCover[0].buffer)
+//       .resize(2000, 1333)
+//       .toFormat('jpg')
+//       .toFile(`public/img/tours/${newTourData.imageCover}`);
+//   }
+
+//   if (req.files && req.files.images) {
+//     newTourData.images = [];
+//     await Promise.all(
+//       req.files.images.map(async (file, index) => {
+//         const filename = `tour-${Date.now()}-${index + 1}.jpg`;
+//         await sharp(file.buffer)
+//           .resize(2000, 1333)
+//           .toFormat('jpg')
+//           .toFile(`public/img/tours/${filename}`);
+//         newTourData.images.push(filename);
+//       })
+//     );
+//   }
+
+//   const newDocument = await Tour.create(newTourData);
+
+//   res.status(201).json({
+//     status: 'success',
+//     data: {
+//       data: newDocument
+//     }
+//   });
+// });
 exports.createTour = catchAsync(async (req, res, next) => {
+  const startLocation = req.body.startLocation ? JSON.parse(req.body.startLocation) : null;
   // Prepare the data for creating a new tour
   const newTourData = {
     name: req.body.name,
@@ -143,13 +198,10 @@ exports.createTour = catchAsync(async (req, res, next) => {
     summary: req.body.summary,
     description: req.body.description,
     secretTour: req.body.secretTour,
-    startLocation: {
-      description: req.body.startLocationDescription,
-      coordinates: req.body.coordinates ? JSON.parse(req.body.coordinates) : undefined,
-    },
+    startLocation: startLocation,  // Use the parsed startLocation
     startDates: req.body.startDates ? JSON.parse(req.body.startDates) : undefined,
   };
-
+  
   // Handle images
   if (req.files && req.files.imageCover) {
     newTourData.imageCover = `tour-${Date.now()}-cover.jpg`;
@@ -173,6 +225,8 @@ exports.createTour = catchAsync(async (req, res, next) => {
     );
   }
 
+  console.log(newTourData, 'from server');
+
   const newDocument = await Tour.create(newTourData);
 
   res.status(201).json({
@@ -182,7 +236,6 @@ exports.createTour = catchAsync(async (req, res, next) => {
     }
   });
 });
-
 exports.updateTour = factory.updateOne(Tour);
 
 exports.deleteTour = factory.deleteOne(Tour);
