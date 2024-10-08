@@ -201,6 +201,8 @@ exports.createTour = catchAsync(async (req, res, next) => {
     startLocation: startLocation,  // Use the parsed startLocation
     startDates: req.body.startDates ? JSON.parse(req.body.startDates) : undefined,
   };
+
+  console.log(newTourData, 'from server');
   
   // Handle images
   if (req.files && req.files.imageCover) {
@@ -225,7 +227,7 @@ exports.createTour = catchAsync(async (req, res, next) => {
     );
   }
 
-  console.log(newTourData, 'from server');
+
 
   const newDocument = await Tour.create(newTourData);
 
