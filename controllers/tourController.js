@@ -185,8 +185,35 @@ exports.getSingleTour = factory.getOne(Tour, { path: 'reviews' });
 //   });
 // });
 exports.createTour = catchAsync(async (req, res, next) => {
+
   const startLocation = req.body.startLocation ? JSON.parse(req.body.startLocation) : null;
-  // Prepare the data for creating a new tour
+
+  const startDates = req.body.startDates ? JSON.parse(req.body.startDates) : undefined;
+
+  const locations = typeof req.body.locations === 'string' ? JSON.parse(req.body.locations) : req.body.locations || [];
+
+  locations.forEach((loc) => {
+    console.log(loc, 'before processing coordinates');
+    
+    if (Array.isArray(loc.coordinates) && loc.coordinates.length === 2) {
+      
+      loc.coordinates = loc.coordinates.map((coord) => Number(coord));
+      
+      // Validate if coordinates are numbers
+      if (loc.coordinates.every((coord) => !isNaN(coord))) {
+      } else {
+        loc.coordinates = []; 
+      }
+    } else {
+      loc.coordinates = []; 
+    }
+  });
+
+  // Clone locations to avoid reference issues
+  const clonedLocations = JSON.parse(JSON.stringify(locations));
+
+  // Prepare the new tour data
+  const guides = req.body.guides ? JSON.parse(req.body.guides) : [];
   const newTourData = {
     name: req.body.name,
     slug: req.body.slug,
@@ -198,12 +225,12 @@ exports.createTour = catchAsync(async (req, res, next) => {
     summary: req.body.summary,
     description: req.body.description,
     secretTour: req.body.secretTour,
-    startLocation: startLocation,  // Use the parsed startLocation
-    startDates: req.body.startDates ? JSON.parse(req.body.startDates) : undefined,
+    startLocation,
+    startDates,
+    locations: clonedLocations,  // Assign cloned locations
+    guides,
   };
 
-  console.log(newTourData, 'from server');
-  
   // Handle images
   if (req.files && req.files.imageCover) {
     newTourData.imageCover = `tour-${Date.now()}-cover.jpg`;
@@ -227,17 +254,16 @@ exports.createTour = catchAsync(async (req, res, next) => {
     );
   }
 
-
-
   const newDocument = await Tour.create(newTourData);
 
   res.status(201).json({
     status: 'success',
     data: {
-      data: newDocument
-    }
+      data: newDocument,
+    },
   });
 });
+
 exports.updateTour = factory.updateOne(Tour);
 
 exports.deleteTour = factory.deleteOne(Tour);

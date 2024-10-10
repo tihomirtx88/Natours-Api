@@ -105,13 +105,16 @@ const tourSchema = new mongoose.Schema(
         type: {
           type: String,
           default: 'Point',
-          enum: ['Point']
+          enum: ['Point'],
         },
-        cordinates: [Number],
+        coordinates: {
+          type: [Number], // Ensure this is set to accept an array of numbers
+          required: true,
+        },
         address: String,
         description: String,
-        day: Number
-      }
+        day: Number,
+      },
     ],
     guides: [
       {
