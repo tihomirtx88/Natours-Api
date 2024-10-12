@@ -40,6 +40,9 @@ exports.uploadTourImages = upload.fields([
 
 
 exports.resizeTourimages = catchAsync(async (req, res, next) => {
+  console.log(req.files);
+  
+  
   if (!req.files.imageCover || !req.files.images) return next();
 
 
@@ -193,13 +196,11 @@ exports.createTour = catchAsync(async (req, res, next) => {
   const locations = typeof req.body.locations === 'string' ? JSON.parse(req.body.locations) : req.body.locations || [];
 
   locations.forEach((loc) => {
-    console.log(loc, 'before processing coordinates');
     
     if (Array.isArray(loc.coordinates) && loc.coordinates.length === 2) {
       
       loc.coordinates = loc.coordinates.map((coord) => Number(coord));
       
-      // Validate if coordinates are numbers
       if (loc.coordinates.every((coord) => !isNaN(coord))) {
       } else {
         loc.coordinates = []; 
@@ -209,10 +210,8 @@ exports.createTour = catchAsync(async (req, res, next) => {
     }
   });
 
-  // Clone locations to avoid reference issues
   const clonedLocations = JSON.parse(JSON.stringify(locations));
 
-  // Prepare the new tour data
   const guides = req.body.guides ? JSON.parse(req.body.guides) : [];
   const newTourData = {
     name: req.body.name,
@@ -227,10 +226,88 @@ exports.createTour = catchAsync(async (req, res, next) => {
     secretTour: req.body.secretTour,
     startLocation,
     startDates,
-    locations: clonedLocations,  // Assign cloned locations
+    locations: clonedLocations,  
     guides,
   };
 
+  // Handle images
+ if (req.files && req.files.imageCover) {
+  newTourData.imageCover = `tour-${Date.now()}-cover.jpg`;
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpg')
+    .toFile(`public/img/tours/${newTourData.imageCover}`);
+}
+
+if (req.files && req.files.images) {
+  newTourData.images = [];
+  await Promise.all(
+    req.files.images.map(async (file, index) => {
+      const filename = `tour-${Date.now()}-${index + 1}.jpg`;
+      await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat('jpg')
+        .toFile(`public/img/tours/${filename}`);
+      newTourData.images.push(filename);
+    })
+  );
+}
+  const newDocument = await Tour.create(newTourData);
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      data: newDocument,
+    },
+  });
+});
+
+exports.updateTour = catchAsync(async (req, res, next) => {
+
+ try {
+  const startLocation = req.body.startLocation ? JSON.parse(req.body.startLocation) : null;
+
+  const startDates = req.body.startDates ? JSON.parse(req.body.startDates) : undefined;
+
+  const locations = typeof req.body.locations === 'string' ? JSON.parse(req.body.locations) : req.body.locations || [];
+
+  locations.forEach((loc) => {
+    console.log(loc, 'before processing coordinates');
+
+    if (Array.isArray(loc.coordinates) && loc.coordinates.length === 2) {
+      loc.coordinates = loc.coordinates.map((coord) => Number(coord));
+
+      
+      if (!loc.coordinates.every((coord) => !isNaN(coord))) {
+        console.error('Invalid coordinates:', loc.coordinates);
+        loc.coordinates = [];
+      }
+    } else {
+      console.error('Invalid location format:', loc); 
+      loc.coordinates = [];
+    }
+  });
+
+  const clonedLocations = JSON.parse(JSON.stringify(locations));
+
+  const guides = req.body.guides ? JSON.parse(req.body.guides) : [];
+  const newTourData = {
+    name: req.body.name,
+    slug: req.body.slug,
+    duration: req.body.duration,
+    maxGroupSize: req.body.maxGroupSize,
+    difficulty: req.body.difficulty,
+    price: req.body.price,
+    priceDiscount: req.body.priceDiscount,
+    summary: req.body.summary,
+    description: req.body.description,
+    secretTour: req.body.secretTour,
+    startLocation,
+    startDates,
+    locations: clonedLocations, 
+    guides,
+  }; 
+   
   // Handle images
   if (req.files && req.files.imageCover) {
     newTourData.imageCover = `tour-${Date.now()}-cover.jpg`;
@@ -239,7 +316,7 @@ exports.createTour = catchAsync(async (req, res, next) => {
       .toFormat('jpg')
       .toFile(`public/img/tours/${newTourData.imageCover}`);
   }
-
+  
   if (req.files && req.files.images) {
     newTourData.images = [];
     await Promise.all(
@@ -254,17 +331,23 @@ exports.createTour = catchAsync(async (req, res, next) => {
     );
   }
 
-  const newDocument = await Tour.create(newTourData);
+  console.log(newTourData);
 
-  res.status(201).json({
+  const newDocument = await Tour.findByIdAndUpdate(req.params.id, newTourData, { new: true, runValidators: true });
+
+  res.status(200).json({ // Change status to 200 for updates
     status: 'success',
     data: {
       data: newDocument,
     },
   });
+ } catch (error) {
+  console.log(error.message);
+  console.log(error);
+ }
 });
 
-exports.updateTour = factory.updateOne(Tour);
+// exports.updateTour = factory.updateOne(Tour);
 
 exports.deleteTour = factory.deleteOne(Tour);
 

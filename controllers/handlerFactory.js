@@ -16,6 +16,12 @@ exports.deleteOne = Model =>
 
 exports.updateOne = Model =>
   catchAsync(async (req, res, next) => {
+     // Check if the request has valid data
+     if (!req.body) {
+      return next(new AppError('No data provided to update', 400));
+    }
+
+
     const updateDocument = await Model.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -41,6 +47,9 @@ exports.createOne = Model =>
   catchAsync(async (req, res, next) => {
     // const newTour = new Tour();
     // newTour.save();
+
+    console.log(req.body, 'from server');
+    
 
     const newTourData = {
       name: req.body.name,
