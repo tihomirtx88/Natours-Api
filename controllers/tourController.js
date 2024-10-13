@@ -512,6 +512,8 @@ exports.getDistances = catchAsync(async (req, res, next) => {
 
 exports.getMyBookings = catchAsync(async (req, res, next) => {
   // Find all booking
+  console.log(req.user.id);
+  
   const bookings = await Booking.find({ user: req.user.id }).populate({
     path: 'tour',
     select: 'name price duration difficulty imageCover images startLocation maxGroupSize startDates' 
