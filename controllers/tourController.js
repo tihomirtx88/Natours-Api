@@ -272,12 +272,10 @@ exports.updateTour = catchAsync(async (req, res, next) => {
   const locations = typeof req.body.locations === 'string' ? JSON.parse(req.body.locations) : req.body.locations || [];
 
   locations.forEach((loc) => {
-    console.log(loc, 'before processing coordinates');
 
     if (Array.isArray(loc.coordinates) && loc.coordinates.length === 2) {
       loc.coordinates = loc.coordinates.map((coord) => Number(coord));
 
-      
       if (!loc.coordinates.every((coord) => !isNaN(coord))) {
         console.error('Invalid coordinates:', loc.coordinates);
         loc.coordinates = [];
@@ -330,8 +328,6 @@ exports.updateTour = catchAsync(async (req, res, next) => {
       })
     );
   }
-
-  console.log(newTourData);
 
   const newDocument = await Tour.findByIdAndUpdate(req.params.id, newTourData, { new: true, runValidators: true });
 
@@ -514,16 +510,35 @@ exports.getDistances = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getMyBookings = catchAsync(async (req, res, next) => {
+  // Find all booking
+  const bookings = await Booking.find({ user: req.user.id }).populate({
+    path: 'tour',
+    select: 'name price duration difficulty imageCover images startLocation maxGroupSize startDates' 
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: bookings.length,
+    data: {
+      bookings,
+    },
+  });
+});
+
 exports.getMyTours = catchAsync(async (req, res, next) => {
   // Find all booking
-  const bookings = await Booking.find({ user: req.user.id });
+  const toors = await Tour.find({ user: req.user.id });
+  console.log(toors, 'from getmytours');
+  
 
   // Find tours with the returned ids
-  const tourIDs = bookings.map(el => el.tour.id);
+  const tourIDs = toors.map(el => el.tour._id);
   const tours = await Tour.find({ _id: { $in: tourIDs } });
 
   res.status(201).json({
     status: 'success',
+    result: tours.length,
     data: {
       tours
     }
