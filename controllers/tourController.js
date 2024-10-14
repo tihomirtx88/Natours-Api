@@ -364,7 +364,10 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
         avgRating: { $avg: '$ratingsAverage' },
         avgPrice: { $avg: '$price' },
         minPrice: { $min: '$price' },
-        maxPrice: { $max: '$price' }
+        maxPrice: { $max: '$price' },
+        totalDuration: { $sum: '$duration' },  // Total duration of tours
+        avgGroupSize: { $avg: '$maxGroupSize' },  // Average group size
+        totalRevenue: { $sum: { $multiply: ['$price', '$maxGroupSize'] } }  // Total potential revenue (price * group size)
       }
     },
     {
