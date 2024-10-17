@@ -42,19 +42,16 @@ const reviewSchema = new mongoose.Schema(
 
 reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
-reviewSchema.pre(/^find/, function() {
-  // this.populate({
-  //   path: 'tour',
-  //   select: 'name'
-  // }).populate({
-  //   path: 'user',
-  //   select: 'name photo'
-  // });
-
+reviewSchema.pre(/^find/, function(next) {
   this.populate({
     path: 'user',
     select: 'name photo'
+  }).populate({
+    path: 'tour',
+    select: 'name duration difficulty ratingsAverage' 
   });
+
+  next();
 
 });
 
@@ -73,33 +70,28 @@ reviewSchema.statics.calcAverageRating = async function(tourId) {
     }
   ]);
 
-  console.log(stats);
-  
-
-  await Tour.findByIdAndUpdate(tourId, {
-    // Cooming data
-    // [
-    //   {
-    //     _id: new ObjectId("66a60e27170fbbea0a635691"),
-    //     nRating: 7,
-    //     avgRating: 3.257142857142857
-    //   }
-    // ]
-    
-    ratingsQuantity: stats[0].nRating,
-    ratingsAverage: stats[0].avgRating
-  });
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: stats[0].nRating,
+      ratingsAverage: stats[0].avgRating
+    });
+  } else {
+    // Reset the ratings if there are no reviews
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5
+    });
+  }
 };
 
-//Call method after document are state save
+// Trigger calculation of ratings after a new review is saved
 reviewSchema.post('save', function() {
    // This point to current review
   this.constructor.calcAverageRating(this.tour);
 });
 
 
-//findOneByIdAndDelete
-//findOneByIdAndDelete for all this hooks
+// Middleware to handle review updates and deletions
 reviewSchema.pre(/^findOneAnd/, async function(next) {
   // This points to current query because of the type of hook and with this.r sending from pre middleware to post middleware on bottom
   this.r = await this.model.findOne(this.getQuery());
