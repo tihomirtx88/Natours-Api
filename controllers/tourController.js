@@ -488,7 +488,7 @@ exports.getDistances = catchAsync(async (req, res, next) => {
       $geoNear: {
         // Some kind of start point
         near: {
-          type: 'Poin',
+          type: 'Point',
           coordinates: [lng, lat * 1]
         },
         distanceField: 'distance',
