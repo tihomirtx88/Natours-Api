@@ -48,7 +48,7 @@ exports.createOne = Model =>
     // const newTour = new Tour();
     // newTour.save();
 
-    console.log(req.body, 'from server');
+    console.log(req.body, 'from sesadsadarver');
     
 
     const newTourData = {
