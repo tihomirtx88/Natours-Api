@@ -27,8 +27,30 @@ exports.setTourUserIds = (req, res, next) => {
 
 exports.getSingleReview = factory.getOne(Review)
 
-exports.createReview = factory.createOne(Review);
+// exports.createReview = factory.createOne(Review);
+exports.createReview =  catchAsync(async (req, res, next) => {
+  try {
+    console.log("Incoming Request Body:", req.body);
+    const newReviewData = {
+      review: req.body.review,
+      rating: req.body.rating,
+      tour: req.body.tour,
+      user: req.body.user
+    };
+    
+    const newDocument = await Review.create(newReviewData);
 
+    res.status(201).json({
+      status: 'success',
+      data: {
+        data: newDocument
+      }
+    });
+  } catch (error) {
+    console.error("Error creating review:", error);
+    return next(new AppError("Could not create review. Please try again later.", 500));
+  }
+});
 exports.updateReview = factory.updateOne(Review);
 
 exports.deleteReview = factory.deleteOne(Review);
