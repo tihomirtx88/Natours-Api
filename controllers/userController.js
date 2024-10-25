@@ -104,8 +104,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   //2. filtered out unwanted fields names that are not allowedto be updated
   const filteredBody = filteredObj(req.body, 'name', 'email');
   if (req.file) filteredBody.photo = req.file.filename;
-  console.log(filteredBody, 'from filtered body');
-  
 
   //3. Update user document
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
@@ -139,6 +137,24 @@ exports.createUser = (req, res) => {
 
 exports.getUser = factory.getOne(User);
 
-exports.updateUser = factory.updateOne(User);
+exports.updateUserOther = catchAsync(async (req, res, next) => {
+ 
+  //1. filtered out unwanted fields names that are not allowedto be updated
+  const filteredBody = filteredObj(req.body, 'name', 'email');
+  if (req.file) filteredBody.photo = req.file.filename;
+
+  //2. Update user document
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser
+    }
+  });
+});
 
 exports.deleteUser = factory.deleteOne(User);
