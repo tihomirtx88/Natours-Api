@@ -138,8 +138,12 @@ exports.createUser = (req, res) => {
 exports.getUser = factory.getOne(User);
 
 exports.updateUserOther = catchAsync(async (req, res, next) => {
- 
-  //1. filtered out unwanted fields names that are not allowedto be updated
+
+  
+  try {
+    console.log(req.user.id);
+    
+    //1. filtered out unwanted fields names that are not allowedto be updated
   const filteredBody = filteredObj(req.body, 'name', 'email');
   if (req.file) filteredBody.photo = req.file.filename;
 
@@ -155,6 +159,12 @@ exports.updateUserOther = catchAsync(async (req, res, next) => {
       user: updatedUser
     }
   });
+  } catch (error) {
+    console.log(error.message);
+    
+  }
+ 
+  
 });
 
 exports.deleteUser = factory.deleteOne(User);
