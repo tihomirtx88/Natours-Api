@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-//The middlewares will not working if use in controller getByIdAndUpdate for example or another update mongoose method
+
 
 userSchema.pre('save', async function(next) {
   //Run tihs function if passowrd was actulay modified

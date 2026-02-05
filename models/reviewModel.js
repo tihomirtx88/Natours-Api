@@ -1,9 +1,5 @@
-const {
-  model,
-  Schema,
-  Types: { ObjectId },
-  default: mongoose
-} = require('mongoose');
+const mongoose = require('mongoose');
+const { model, Types: { ObjectId } } = mongoose;
 
 const Tour = require('./tourModel');
 
@@ -20,7 +16,7 @@ const reviewSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now()
+      default: Date.now
     },
     tour: {
       type: ObjectId,

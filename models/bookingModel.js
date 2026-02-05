@@ -1,8 +1,5 @@
-const {
-  model,
-  Types: { ObjectId },
-  default: mongoose
-} = require('mongoose');
+const mongoose = require('mongoose');
+const { model, Types: { ObjectId } } = mongoose;
 
 const Tour = require('./tourModel');
 const validator = require('validator');
@@ -18,13 +15,10 @@ const bookingSchema = new mongoose.Schema({
     ref: 'User',
     required: [true, 'Booking must belong to a User!']
   },
-  price: {
-    type: Number,
-    required: [true, 'Booking must have a price!']
-  },
+  price: Number,
   createdAt: {
     type: Date,
-    default: Date.now()
+    default: Date.now
   },
   paid: {
     type: Boolean,
@@ -62,8 +56,9 @@ bookingSchema.pre(/^find/, function(next) {
 });
 
 // Middleware to set booking price based on the tour's price
+
 bookingSchema.pre('save', async function(next) {
-  if (!this.isModified('price')) return next();
+   if (!this.isNew) return next();
 
   // Fetch the tour data
   const tour = await Tour.findById(this.tour);
@@ -71,32 +66,22 @@ bookingSchema.pre('save', async function(next) {
     return next(new Error('Tour not found!'));
   }
 
-  // Set the booking price to the tour's price
-  this.price = tour.price;
-
-  next();
-});
-
-// Middleware to check if the tour is fully booked
-bookingSchema.pre('save', async function(next) {
-  // Find all bookings for the same tour
+  // Capacity check
   const bookedCount = await this.constructor.countDocuments({
     tour: this.tour
   });
 
-  const tour = await Tour.findById(this.tour);
-
-  // Check if the number of bookings exceeds the maximum group size
   if (bookedCount >= tour.maxGroupSize) {
-    return next(new Error('The tour is fully booked!'));
+    return next(new Error('The tour is fully booked'));
   }
 
   next();
 });
 
+
 // Virtual field to calculate total revenue from bookings
 bookingSchema.virtual('revenue').get(function () {
-  return this.price * 1; // Assuming price is per booking (can be adjusted)
+  return this.price * this.participants;
 });
 
 const Booking = model('Booking', bookingSchema);
