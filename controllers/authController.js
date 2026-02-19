@@ -17,7 +17,7 @@ const createSendToken = (user, statusCode, res) => {
   const cookieOptions = {
     //Convert to milisecounds
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 20 * 60 * 60 * 1000
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
     sameSite: 'None',
@@ -103,7 +103,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   if (!token) {
-    next(
+    return next(
       new AppError('You are not logged in! Please login to get access.', 401)
     );
   }
@@ -173,7 +173,7 @@ exports.restrictTo = (...roles) => {
   //roles: [admin, lead-guide], role=user and this middleware have access to roles parametars beacse there is a closer because
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      next(
+      return next(
         new AppError('You do not have persmission to perform this action!', 403)
       );
     }
