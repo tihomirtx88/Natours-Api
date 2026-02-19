@@ -1,9 +1,5 @@
-const {
-  model,
-  Schema,
-  Types: { ObjectId },
-  default: mongoose
-} = require('mongoose');
+const mongoose = require('mongoose');
+const { model, Types: { ObjectId } } = mongoose
 
 const slugify = require('slugify');
 const validator = require('validator');
@@ -82,7 +78,7 @@ const tourSchema = new mongoose.Schema(
     images: [String],
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
       select: false
     },
     startDates: [Date],

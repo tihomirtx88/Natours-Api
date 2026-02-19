@@ -4,54 +4,64 @@ class APIFeatures {
     this.reqQueryString = reqQueryString;
   }
 
+  //Example
+  // new APIFeatures(Tour.find(), req.query)
+  // .filter()
+  // .sorting()
+  // .limitFields()
+  // .pagination();
+
   filter() {
     //1.Filtering
-    const queryObj = { ...this.reqQueryString };
-    const exludedFields = ['page', 'sort', 'limit', 'fields'];
-    exludedFields.forEach(el => delete queryObj[el]);
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    const filters = { ...this.queryString };
+    // Clean system fields
+    excludedFields.forEach(field => delete filters[field]);
 
     //2.Advanced filtering
-    let queryString = JSON.stringify(queryObj);
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt)\b/g,
-      match => `$${match}`
-    );
+    Object.keys(filters).forEach(key => {
+      if (typeof filters[key] === 'object') {
+        Object.keys(filters[key]).forEach(operator => {
+          if (['gte', 'gt', 'lte', 'lt'].includes(operator)) {
+            filters[key][`$${operator}`] = filters[key][operator];
+            delete filters[key][operator];
+          }
+        });
+      }
+    });
 
-    this.query = this.query.find(JSON.parse(queryString));
-
+    this.query = this.query.find(filters);
     return this;
   }
 
   sorting() {
-    if (this.reqQueryString.sort) {
-      const sortBy = this.reqQueryString.sort.split(',').join(' ');
-      this.query = this.query.sort(sortBy);
-    } else {
-      this.query = this.query.sort('-createdAt');
-    }
+    const sortBy = this.queryString.sort
+      ? this.queryString.sort.split(',').join(' ')
+      : '-createdAt';
+
+    this.query = this.query.sort(sortBy);
+    return this;
+    // Transform to this .sort('price ratingsAverage')
 
     return this;
   }
 
   limitFields() {
-    if (this.reqQueryString.fields) {
-      const fields = this.reqQueryString.fields.split(',').join(' ');
-      this.query = this.query.select(fields);
-    } else {
-      // Exloding  __v property
-      this.query = this.query.select('-__v');
-    }
+    const fields = this.queryString.fields
+      ? this.queryString.fields.split(',').join(' ')
+      : '-__v';
 
+    this.query = this.query.select(fields);
     return this;
+    //Transform to .select('name price duration')
   }
 
   pagination() {
-    const page = this.reqQueryString.page * 1 || 1;
-    const limit = this.reqQueryString.limit * 1 || 100;
+    const page = Math.max(parseInt(this.queryString.page, 10) || 1, 1);
+    const limit = Math.min(parseInt(this.queryString.limit, 10) || 100, 100);
     const skip = (page - 1) * limit;
-    //page=2&limit=10 1-10 -page one 11 -20 page 20
-    this.query = this.query.skip(skip).limit(limit);
 
+    this.query = this.query.skip(skip).limit(limit);
     return this;
   }
 }
