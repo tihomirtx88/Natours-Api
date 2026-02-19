@@ -8,7 +8,7 @@ const handleCastErrorDB = err => {
 
 //Send Better message from mongo to client in case duplicate name
 const handleDuplicatesFields = err => {
-  const value = err.errmsg.match(/(["'])(?:(?=(\\?))\2.)*?\1/)[0];
+  const value = Object.values(err.keyValue)[0];
   const message = `Duplicate fields value: ${value}. Please use another value`;
   return new AppError(message, 400);
 };
@@ -55,6 +55,7 @@ const sendErrorProd = (err, res) => {
     });
   }
 };
+
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
@@ -63,7 +64,7 @@ module.exports = (err, req, res, next) => {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
     // Hard copy on error object and asignt to
-    let error = { ...err };
+    let error = err;
 
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicatesFields(error);

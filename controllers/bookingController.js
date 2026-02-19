@@ -9,6 +9,8 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   //1. Get currently book tour
   const tour = await Tour.findById(req.params.tourID);
 
+  if (!tour) return next(new AppError('No tour found', 404));
+
   // 2.Create checkout session
   //Information about session
   const session = await stripe.checkout.sessions.create({
@@ -22,11 +24,14 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     line_items: [
       //Information about product
       {
-        name: `${tour.name} Tour`,
-        description: tour.summary,
-        images: [tour.imageCover],
-        amount: tour.price * 100,
-        currency: 'usd',
+        price_data: {
+          currency: 'usd',
+          unit_amount: tour.price * 100,
+          product_data: {
+            name: tour.name,
+            description: tour.summary
+          }
+        },
         quantity: 1
       }
     ]
@@ -42,7 +47,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 exports.createBookingCheckout = catchAsync(async (req, res, next) => {
   const { tour, user, price } = req.query;
 
-  if (!tour && !user && !price) return next();
+  if (!tour || !user || !price) return next();
 
   await Booking.create({
     tour,
@@ -58,5 +63,3 @@ exports.getAllBookings = factory.getAll(Booking);
 exports.updateBooking = factory.updateOne(Booking);
 exports.deleteBooking = factory.deleteOne(Booking);
 exports.createBooking = factory.createOne(Booking);
-
-
