@@ -1,9 +1,7 @@
-const {
-  model,
-  Schema,
-  Types: { ObjectId },
-  default: mongoose
-} = require('mongoose');
+const mongoose = require('mongoose');
+const { model } = mongoose
+
+
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
@@ -42,7 +40,7 @@ const userSchema = new mongoose.Schema({
     validate: {
       // This work only on CREATE and SAVE
       validator: function(el) {
-        return (el = this.password); //123456 === 123456
+        return el === this.password;
       },
       message: 'Password are not the same!'
     }
@@ -116,7 +114,7 @@ userSchema.methods.createPasswordResetToken = function() {
 
   console.log({ resetToken }, this.passwordResetToken);
   //To add few miliseconds
-  this.passwordResetExpired = Date.now() + 10 * 60 * 100;
+  this.passwordResetExpired = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
 };
